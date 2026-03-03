@@ -3,114 +3,120 @@ import { useNavigate } from "react-router-dom";
 import { isTitleDuplicate, createProject } from "../../services/projectService";
 
 export default function AddProject() {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const [title, setTitle] = useState("");
-  const [carType, setCarType] = useState("Sedan");
-  const [uploadModel, setUploadModel] = useState(false);
-  const [modelFile, setModelFile] = useState(null);
-  const [defaultModel, setDefaultModel] = useState("model1.glb");
-  const [errorMsg, setErrorMsg] = useState("");
+	const [title, setTitle] = useState("");
+	const [carType, setCarType] = useState("Sedan");
+	const [uploadModel, setUploadModel] = useState(false);
+	const [modelFile, setModelFile] = useState(null);
+	const [defaultModel, setDefaultModel] = useState("model1.glb");
+	const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMsg("");
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setErrorMsg("");
 
-    // Validasi title
-    const duplicate = await isTitleDuplicate(title);
-    if (duplicate) {
-      setErrorMsg("Title sudah ada, silakan gunakan yang lain.");
-      return;
-    }
+		// Validasi title
+		const duplicate = await isTitleDuplicate(title);
+		if (duplicate) {
+			setErrorMsg("Title sudah ada, silakan gunakan yang lain.");
+			return;
+		}
 
-    // Build project object
-    const project = {
-      title,
-      car_type: carType,
-      upload_model: uploadModel,
-      model_url: uploadModel
-        ? URL.createObjectURL(modelFile)
-        : defaultModel,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
+		// Validasi jika upload model dicentang tapi file belum diupload
+		if (uploadModel && !modelFile) {
+			setErrorMsg("Silakan upload model terlebih dahulu.");
+			return;
+		}
 
-    // Insert ke Supabase
-    const result = await createProject(project);
-    if (!result) {
-      setErrorMsg("Terjadi error saat menyimpan project.");
-      return;
-    }
+		// Build project object
+		const project = {
+			title,
+			car_type: carType,
+			upload_model: uploadModel,
+			model_url: uploadModel
+				? URL.createObjectURL(modelFile)
+				: defaultModel,
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
+		};
 
-    // Redirect ke Customize page
-    navigate(`/customize/${encodeURIComponent(title)}`);
-  };
+		// Insert ke Supabase
+		const result = await createProject(project);
+		if (!result) {
+			setErrorMsg("Terjadi error saat menyimpan project.");
+			return;
+		}
 
-  return (
-    <div>
-      <h1>Add Project</h1>
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "400px" }}
-      >
-        <label>
-          Title:
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </label>
+		// Redirect ke Customize page
+		navigate(`/customize/${encodeURIComponent(title)}`);
+	};
 
-        <label>
-          Car Type:
-          <select value={carType} onChange={(e) => setCarType(e.target.value)}>
-            <option>Sedan</option>
-            <option>SUV</option>
-            <option>Coupe</option>
-            <option>Hatchback</option>
-          </select>
-        </label>
+	return (
+		<div>
+			<h1>Add Project</h1>
+			<form
+				onSubmit={handleSubmit}
+				style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "400px" }}
+			>
+				<label>
+					Title:
+					<input
+						type="text"
+						value={title}
+						onChange={(e) => setTitle(e.target.value)}
+						required
+					/>
+				</label>
 
-        <label>
-          <input
-            type="checkbox"
-            checked={uploadModel}
-            onChange={(e) => setUploadModel(e.target.checked)}
-          />
-          Upload model sendiri
-        </label>
+				<label>
+					Car Type:
+					<select value={carType} onChange={(e) => setCarType(e.target.value)}>
+						<option>Sedan</option>
+						<option>SUV</option>
+						<option>Coupe</option>
+						<option>Hatchback</option>
+					</select>
+				</label>
 
-        {uploadModel && (
-          <label>
-            Upload file:
-            <input
-              type="file"
-              accept=".glb,.gltf,.obj"
-              onChange={(e) => setModelFile(e.target.files[0])}
-            />
-          </label>
-        )}
+				<label>
+					<input
+						type="checkbox"
+						checked={uploadModel}
+						onChange={(e) => setUploadModel(e.target.checked)}
+					/>
+					Upload model sendiri
+				</label>
 
-        {!uploadModel && (
-          <label>
-            Pilih model yang tersedia:
-            <select
-              value={defaultModel}
-              onChange={(e) => setDefaultModel(e.target.value)}
-            >
-              <option value="model1.glb">Model 1</option>
-              <option value="model2.glb">Model 2</option>
-              <option value="model3.glb">Model 3</option>
-            </select>
-          </label>
-        )}
+				{uploadModel && (
+					<label>
+						Upload file:
+						<input
+							type="file"
+							accept=".glb,.gltf,.obj"
+							onChange={(e) => setModelFile(e.target.files[0])}
+						/>
+					</label>
+				)}
 
-        {errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+				{!uploadModel && (
+					<label>
+						Pilih model yang tersedia:
+						<select
+							value={defaultModel}
+							onChange={(e) => setDefaultModel(e.target.value)}
+						>
+							<option value="model1.glb">Model 1</option>
+							<option value="model2.glb">Model 2</option>
+							<option value="model3.glb">Model 3</option>
+						</select>
+					</label>
+				)}
 
-        <button type="submit">Start Customizing</button>
-      </form>
-    </div>
-  );
+				{errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
+
+				<button type="submit">Start Customizing</button>
+			</form>
+		</div>
+	);
 }

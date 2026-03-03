@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 
 export default function Customize() {
-  const { title } = useParams();
+	const { title } = useParams();
 
-  return <h1>Customize Page: {title}</h1>;
+	return <h1>Customize Page: {title}</h1>;
 }
