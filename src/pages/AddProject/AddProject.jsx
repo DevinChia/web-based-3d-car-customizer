@@ -11,24 +11,31 @@ export default function AddProject() {
 	const [modelFile, setModelFile] = useState(null);
 	const [defaultModel, setDefaultModel] = useState("model1.glb");
 	const [errorMsg, setErrorMsg] = useState("");
+	const [showModal, setShowModal] = useState(false);
+
+	const showError = (message) => {
+		setErrorMsg(message);
+		setShowModal(true);
+	};	  
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		setShowModal(false);
 		setErrorMsg("");
 
 		if (!title.trim()) {
-			setErrorMsg("Title tidak boleh kosong.");
+			showError("Title tidak boleh kosong.");
 			return;
 		}
 
 		const duplicate = await isTitleDuplicate(title);
 		if (duplicate) {
-			setErrorMsg("Title sudah ada, silakan gunakan yang lain.");
+			showError("Title sudah ada, silakan gunakan yang lain.");
 			return;
 		}
 
 		if (uploadModel && !modelFile) {
-			setErrorMsg("Silakan upload model terlebih dahulu.");
+			showError("Silakan upload model terlebih dahulu.");
 			return;
 		}
 
@@ -49,13 +56,33 @@ export default function AddProject() {
 		// Insert ke Supabase
 		const result = await createProject(project);
 		if (!result) {
-			setErrorMsg("Terjadi error saat menyimpan project.");
+			showError("Terjadi error saat menyimpan project.");
 			return;
 		}
 
 		// Redirect ke Customize page
 		navigate(`/customize/${encodeURIComponent(title)}`);
 	};
+
+	const overlayStyle = {
+		position: "fixed",
+		top: 0,
+		left: 0,
+		width: "100%",
+		height: "100%",
+		backgroundColor: "rgba(0,0,0,0.5)",
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
+	};
+		
+	const modalStyle = {
+		background: "white",
+		padding: "20px",
+		borderRadius: "10px",
+		width: "300px",
+		textAlign: "center",
+	};	  
 
 	return (
 		<div>
@@ -126,10 +153,17 @@ export default function AddProject() {
 					</label>
 				)}
 
-				{errorMsg && <p style={{ color: "red" }}>{errorMsg}</p>}
-
 				<button type="submit">Start Customizing</button>
 			</form>
+			{showModal && (
+				<div style={overlayStyle}>
+					<div style={modalStyle}>
+					<h3>Error</h3>
+					<p>{errorMsg}</p>
+					<button onClick={() => setShowModal(false)}>OK</button>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

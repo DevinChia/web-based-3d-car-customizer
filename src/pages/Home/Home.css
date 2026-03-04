@@ -1,0 +1,49 @@
+.home {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	padding: 0 10rem;
+	gap: 1.5rem;
+}
+
+.home-text-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}
+
+.home-buttons-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+}
+
+
+.home-buttons-container button {
+	padding: 0.8rem 1.8rem;
+	border-radius: 8px;
+	font-weight: 400;
+	box-shadow: 0 0 12px rgb(0 0 0 / 30%);
+	min-width: 10rem;
+}
+
+.home-buttons-container button:hover {
+	box-shadow: 0 0 14px rgb(0 0 0 / 50%);
+	transition: all 0.2s ease;
+}
+
+.home-start-customizing-button {
+	background-color: var(--color-2);
+	color: var(--font-color-2);
+}
+
+.home-view-works-button {
+	background-color: var(--color-1);
+	color: var(--font-color-1);
+}

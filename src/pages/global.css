@@ -1,0 +1,33 @@
+:root {
+	--color-1: #FFFFFF;
+	--color-2: #0400FF;
+	--font-color-1: #0E0E0E;
+	--font-color-2: #FFFFFF;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-1);
+  color: var(--font-color-1);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+	font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
