@@ -45,3 +45,24 @@ export async function getProjectByTitle(title) {
 
 	return data;
 }
+
+export async function getAllProjects(sortBy = "created_at", order = "desc", carType = null) {
+	let query = supabase
+		.from("projects")
+		.select("*");
+
+	if (carType && carType !== "All") {
+		query = query.eq("car_type", carType);
+	}
+
+	query = query.order(sortBy, { ascending: order === "asc" });
+
+	const { data, error } = await query;
+
+	if (error) {
+		console.error("Supabase fetch error:", error);
+		return [];
+	}
+
+	return data;
+}
