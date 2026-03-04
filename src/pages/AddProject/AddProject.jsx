@@ -16,27 +16,32 @@ export default function AddProject() {
 		e.preventDefault();
 		setErrorMsg("");
 
-		// Validasi title
+		if (!title.trim()) {
+			setErrorMsg("Title tidak boleh kosong.");
+			return;
+		}
+
 		const duplicate = await isTitleDuplicate(title);
 		if (duplicate) {
 			setErrorMsg("Title sudah ada, silakan gunakan yang lain.");
 			return;
 		}
 
-		// Validasi jika upload model dicentang tapi file belum diupload
 		if (uploadModel && !modelFile) {
 			setErrorMsg("Silakan upload model terlebih dahulu.");
 			return;
 		}
 
-		// Build project object
+		// ✅ Simpan hanya nama file, bukan blob URL
+		const modelUrl = uploadModel
+			? modelFile.name
+			: defaultModel;
+
 		const project = {
-			title,
+			title: title.trim(),
 			car_type: carType,
 			upload_model: uploadModel,
-			model_url: uploadModel
-				? URL.createObjectURL(modelFile)
-				: defaultModel,
+			model_url: modelUrl,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString(),
 		};
@@ -57,7 +62,12 @@ export default function AddProject() {
 			<h1>Add Project</h1>
 			<form
 				onSubmit={handleSubmit}
-				style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "400px" }}
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					gap: "1rem",
+					maxWidth: "400px",
+				}}
 			>
 				<label>
 					Title:
@@ -83,7 +93,10 @@ export default function AddProject() {
 					<input
 						type="checkbox"
 						checked={uploadModel}
-						onChange={(e) => setUploadModel(e.target.checked)}
+						onChange={(e) => {
+							setUploadModel(e.target.checked);
+							setModelFile(null);
+						}}
 					/>
 					Upload model sendiri
 				</label>

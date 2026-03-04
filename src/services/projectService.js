@@ -30,3 +30,18 @@ export async function createProject(project) {
 
 	return data[0];
 }
+
+export async function getProjectByTitle(title) {
+	const { data, error } = await supabase
+		.from("projects")
+		.select("*")
+		.eq("title", title)
+		.single();
+
+	if (error) {
+		console.error("Supabase fetch error:", error);
+		return null;
+	}
+
+	return data;
+}
