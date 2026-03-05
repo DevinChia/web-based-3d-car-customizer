@@ -1,5 +1,6 @@
 import "./MyWorks.css";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAllProjects } from "../../services/projectService";
 
 export default function MyWorks() {
@@ -7,6 +8,11 @@ export default function MyWorks() {
 	const [sortBy, setSortBy] = useState("created_at");
 	const [order, setOrder] = useState("desc");
 	const [carType, setCarType] = useState("All");
+	const navigate = useNavigate();
+
+	const handleEdit = (id) => {
+	navigate(`/customize/${id}`);
+	};
 
 	useEffect(() => {
 		const fetchProjects = async () => {
@@ -18,7 +24,7 @@ export default function MyWorks() {
 	}, [sortBy, order, carType]);
 
 	return (
-		<div>
+		<div className="my-works">
 			<h1>My Works</h1>
 
 			{/* Controls */}
@@ -44,12 +50,15 @@ export default function MyWorks() {
 			</div>
 
 			{/* Card List */}
-			<div style={{ display: "grid", gap: "1rem" }}>
+			<div className="my-works-card-list">
 				{projects.map((project) => (
-					<div key={project.id} style={{ border: "1px solid gray", padding: "1rem" }}>
+					<div key={project.id} className="project-card">
 						<h3>{project.title}</h3>
 						<p>Car Type: {project.car_type}</p>
 						<p>Created: {new Date(project.created_at).toLocaleString()}</p>
+						<button onClick={() => handleEdit(project.id)}>
+							Edit Project
+						</button>
 					</div>
 				))}
 			</div>

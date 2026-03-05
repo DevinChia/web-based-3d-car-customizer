@@ -31,11 +31,11 @@ export async function createProject(project) {
 	return data[0];
 }
 
-export async function getProjectByTitle(title) {
+export async function getProjectById(id) {
 	const { data, error } = await supabase
 		.from("projects")
 		.select("*")
-		.eq("title", title)
+		.eq("id", id)
 		.single();
 
 	if (error) {

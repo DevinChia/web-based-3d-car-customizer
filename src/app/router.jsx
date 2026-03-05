@@ -13,7 +13,7 @@ export default function Router() {
 				<Route path="/" element={<Home />} />
 				<Route element={<Layout />}>
 					<Route path="/add-project" element={<AddProject />} />
-					<Route path="/customize/:title" element={<Customize />} />
+					<Route path="/customize/:id" element={<Customize />} />
 					<Route path="/my-works" element={<MyWorks />} />
 				</Route>
 			</Routes>
