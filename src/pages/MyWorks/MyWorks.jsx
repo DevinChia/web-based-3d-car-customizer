@@ -1,3 +1,4 @@
+import "./MyWorks.css";
 import { useEffect, useState } from "react";
 import { getAllProjects } from "../../services/projectService";
 
