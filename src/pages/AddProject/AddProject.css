@@ -1,0 +1,130 @@
+.add-project {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+}
+
+.form-add-project {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	min-width: 60rem;
+	min-height: 35rem;
+	border-radius: 8px;
+	box-shadow: 0 0 12px rgb(0 0 0 / 30%);
+	padding: 0 5rem;
+}
+
+.form-add-project-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	min-width: 40rem;
+}
+
+.add-project-fields {
+	display: flex;
+	flex-direction: column;
+}
+
+.project-title-input {
+	border-style: solid;
+	border-color: var(--color-2);
+	border-radius: 4px;
+	font-size: 1rem;
+	padding: 0.5rem;
+}
+
+.project-title-input:focus {
+	border-color: var(--color-3);
+	outline: none;
+}
+
+.add-project-select-field {
+	min-height: 1rem;
+	border-style: solid;
+	border-radius: 4px;
+	border-color: var(--color-2);
+	border-width: 2px;
+	padding: 0.5rem;
+}
+
+.upload-file-checkbox-field {
+  display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0.3rem;
+}
+
+.upload-file-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-2);
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
+}
+
+.upload-file-checkbox:checked {
+  background-color: var(--color-2);
+}
+
+.upload-file-checkbox::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+  background-color: white;
+}
+
+.upload-file-checkbox:checked::before {
+  transform: scale(1);
+}
+
+.upload-file-field {
+	gap: 0.2rem;
+}
+
+.upload-file-input {
+	min-height: 2rem;
+}
+
+.project-start-customizing-button {
+	background-color: var(--color-2);
+	color: var(--font-color-2);
+	padding: 0.8rem 1.8rem;
+	border-radius: 8px;
+	font-weight: 400;
+	box-shadow: 0 0 12px rgb(0 0 0 / 30%);
+	min-width: 10rem;
+}
+
+.project-start-customizing-button:hover {
+	box-shadow: 0 0 14px rgb(0 0 0 / 50%);
+	transition: all 0.2s ease;
+}
+
+.error-popup-background {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.error-popup {
+	background: var(--color-1);
+	padding: 1.25rem;
+	border-radius: 10px;
+	width: 18.75rem;
+	text-align: center;
+}
