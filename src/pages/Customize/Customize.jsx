@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProjectById } from "../../services/projectService";
+import Viewer from "../../components/Viewer";
 
 export default function Customize() {
 	const { id } = useParams();
@@ -24,9 +25,9 @@ export default function Customize() {
 
 	return (
 		<div>
-			<h1>Customize Page: {project.title}</h1>
-			<p>Car Type: {project.car_type}</p>
-			<p>Model Path: {modelPath}</p>
+			<h1>{project.title}</h1>
+
+			<Viewer modelPath={modelPath} />
 		</div>
 	);
 }
