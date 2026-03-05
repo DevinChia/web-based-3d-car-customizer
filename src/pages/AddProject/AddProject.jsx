@@ -31,7 +31,7 @@ export default function AddProject() {
 
 		const duplicate = await isTitleDuplicate(title);
 		if (duplicate) {
-			showError("This title has been used. Please use another.");
+			showError("This title is already in use. Please use another.");
 			return;
 		}
 
@@ -62,7 +62,7 @@ export default function AddProject() {
 		}
 
 		// Redirect ke Customize page
-		navigate(`/customize/${encodeURIComponent(title)}`);
+		navigate(`/customize/${result.id}`);
 	};
 
 	return (

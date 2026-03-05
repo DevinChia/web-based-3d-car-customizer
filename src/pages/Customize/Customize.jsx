@@ -1,26 +1,25 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProjectByTitle } from "../../services/projectService";
+import { getProjectById } from "../../services/projectService";
 
 export default function Customize() {
-	const { title } = useParams();
+	const { id } = useParams();
 	const [project, setProject] = useState(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		const fetchProject = async () => {
-			const data = await getProjectByTitle(title);
+			const data = await getProjectById(id);
 			setProject(data);
 			setLoading(false);
 		};
 
 		fetchProject();
-	}, [title]);
+	}, [id]);
 
 	if (loading) return <p>Loading...</p>;
 	if (!project) return <p>Project tidak ditemukan.</p>;
 
-	// ✅ Build path konsisten
 	const modelPath = `/models/${project.model_url}`;
 
 	return (

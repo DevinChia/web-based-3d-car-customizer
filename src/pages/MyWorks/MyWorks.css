@@ -1,0 +1,19 @@
+.my-works {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	padding: 5rem 6rem;
+}
+
+.my-works-card-list {
+	flex: 1;
+	display: grid;
+	gap: 1rem;
+	overflow-y: auto;
+	padding-right: 0.5rem;
+}
+
+.project-card {
+	border: 1px solid gray;
+	padding: 1rem;
+}
