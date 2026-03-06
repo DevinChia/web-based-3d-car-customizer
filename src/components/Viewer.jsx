@@ -12,13 +12,23 @@ export default function Viewer({ modelPath }) {
 	
 		const camera = new THREE.PerspectiveCamera(
 			75,
-			window.innerWidth / window.innerHeight,
+			mount.clientWidth / mount.clientHeight,
 			0.1,
 			1000
 		);
 	
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setSize(mount.clientWidth, mount.clientHeight);
+
+		const handleResize = () => {
+			const width = mount.clientWidth;
+			const height = mount.clientHeight;
+			renderer.setSize(width, height);
+			camera.aspect = width / height;
+			camera.updateProjectionMatrix();
+		};
+		  
+		window.addEventListener("resize", handleResize);		  
 	
 		mount.appendChild(renderer.domElement);
 	
@@ -45,6 +55,7 @@ export default function Viewer({ modelPath }) {
 		animate();
 	
 		return () => {
+			window.removeEventListener("resize", handleResize);
 			if (mount && renderer.domElement) {
 				mount.removeChild(renderer.domElement);
 			}
@@ -52,5 +63,5 @@ export default function Viewer({ modelPath }) {
 	}, [modelPath]);
 	
 
-	return <div ref={mountRef}></div>;
+	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
 }

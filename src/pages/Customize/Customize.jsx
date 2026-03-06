@@ -1,3 +1,4 @@
+import "./Customize.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getProjectById } from "../../services/projectService";
@@ -24,10 +25,9 @@ export default function Customize() {
 	const modelPath = `/models/${project.model_url}`;
 
 	return (
-		<div>
-			<h1>{project.title}</h1>
-
-			<Viewer modelPath={modelPath} />
+		<div className="viewer-container">
+		  <h1 className="viewer-title">{project.title}</h1>
+		  <Viewer modelPath={modelPath} />
 		</div>
-	);
+	  );	  
 }
