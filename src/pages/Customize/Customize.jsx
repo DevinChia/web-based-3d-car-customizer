@@ -22,7 +22,7 @@ export default function Customize() {
 	if (loading) return <p>Loading...</p>;
 	if (!project) return <p>Project tidak ditemukan.</p>;
 
-	const modelPath = `/models/${project.model_url}`;
+	const modelPath = project.model_url;
 
 	return (
 		<div className="viewer-container">

@@ -1,14 +1,14 @@
 import "./AddProject.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isTitleDuplicate, createProject } from "../../services/projectService";
+import { isTitleDuplicate, createProject, uploadModel } from "../../services/projectService";
 
 export default function AddProject() {
 	const navigate = useNavigate();
 
 	const [title, setTitle] = useState("");
 	const [carType, setCarType] = useState("Sedan");
-	const [uploadModel, setUploadModel] = useState(false);
+	const [isUploadModel, setIsUploadModel] = useState(false);
 	const [modelFile, setModelFile] = useState(null);
 	const [defaultModel, setDefaultModel] = useState("toyota_camry.glb");
 	const [errorMsg, setErrorMsg] = useState("");
@@ -17,7 +17,7 @@ export default function AddProject() {
 	const showError = (message) => {
 		setErrorMsg(message);
 		setShowModal(true);
-	};	  
+	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -35,33 +35,37 @@ export default function AddProject() {
 			return;
 		}
 
-		if (uploadModel && !modelFile) {
+		if (isUploadModel && !modelFile) {
 			showError("Please upload a model.");
 			return;
 		}
 
-		// ✅ Simpan hanya nama file, bukan blob URL
-		const modelUrl = uploadModel
-			? modelFile.name
-			: defaultModel;
+		let modelUrl = null;
+
+		// upload model ke storage
+		if (isUploadModel) {
+			modelUrl = await uploadModel(modelFile);
+		} 
+		// pakai model default
+		else {
+			modelUrl = `/models/${defaultModel}`;
+		}
 
 		const project = {
 			title: title.trim(),
 			car_type: carType,
-			upload_model: uploadModel,
+			upload_model: isUploadModel,
 			model_url: modelUrl,
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString(),
 		};
 
-		// Insert ke Supabase
 		const result = await createProject(project);
 		if (!result) {
 			showError("Terjadi error saat menyimpan project.");
 			return;
 		}
 
-		// Redirect ke Customize page
 		navigate(`/customize/${result.id}`);
 	};
 
@@ -101,9 +105,9 @@ export default function AddProject() {
 						<input
 							className="upload-file-checkbox"
 							type="checkbox"
-							checked={uploadModel}
+							checked={isUploadModel}
 							onChange={(e) => {
-								setUploadModel(e.target.checked);
+								setIsUploadModel(e.target.checked);
 								setModelFile(null);
 							}}
 						/>
@@ -112,7 +116,7 @@ export default function AddProject() {
 						</label>
 					</div>
 
-					{uploadModel && (
+					{isUploadModel && (
 						<div className="upload-file-field add-project-fields">
 							<label>
 								Upload File
@@ -126,7 +130,7 @@ export default function AddProject() {
 						</div>
 					)}
 
-					{!uploadModel && (
+					{!isUploadModel && (
 						<div className="choose-model-field add-project-fields">
 							<label>
 								Choose a Model

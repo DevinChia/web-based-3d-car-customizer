@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 export default function Viewer({ modelPath }) {
+	console.log(modelPath)
 	const mountRef = useRef(null);
 
 	useEffect(() => {
@@ -33,7 +35,7 @@ export default function Viewer({ modelPath }) {
 	
 		mount.appendChild(renderer.domElement);
 	
-		camera.position.set(0, 2, 5);
+		camera.position.set(2, 0.6, 2);
 	
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
@@ -48,10 +50,29 @@ export default function Viewer({ modelPath }) {
 		directionalLight.position.set(5, 10, 5);
 		scene.add(directionalLight);
 
-		const geometry = new THREE.BoxGeometry();
-		const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-		const cube = new THREE.Mesh(geometry, material);
-		scene.add(cube);
+		const loader = new GLTFLoader();
+
+		loader.load(modelPath, (gltf) => {
+			const model = gltf.scene;
+		
+			const box = new THREE.Box3().setFromObject(model);
+			const size = box.getSize(new THREE.Vector3());
+		  
+			const maxDim = Math.max(size.x, size.y, size.z);
+			const scaleFactor = 3 / maxDim;
+			model.scale.setScalar(scaleFactor);
+		  
+			const box2 = new THREE.Box3().setFromObject(model);
+			const center2 = box2.getCenter(new THREE.Vector3());
+			const size2 = box2.getSize(new THREE.Vector3());
+		  
+			model.position.sub(center2);
+		  
+			scene.add(model);
+		  
+			controls.target.set(0, size2.y * 0.3, 0);
+			controls.update();
+		});
 	
 		const animate = () => {
 			requestAnimationFrame(animate);

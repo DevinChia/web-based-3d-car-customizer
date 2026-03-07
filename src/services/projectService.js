@@ -46,6 +46,26 @@ export async function getProjectById(id) {
 	return data;
 }
 
+export async function uploadModel(file) {
+	const fileName = `${Date.now()}_${file.name}`;
+
+	const { data, error } = await supabase.storage
+		.from("models")
+		.upload(fileName, file);
+
+	if (error) {
+		console.error("Upload error:", error);
+		return null;
+	}
+
+	const { data: publicUrl } = supabase.storage
+		.from("models")
+		.getPublicUrl(fileName);
+	
+	console.log("Generated URL:", publicUrl.publicUrl);
+	return publicUrl.publicUrl;
+}
+
 export async function getAllProjects(sortBy = "created_at", order = "desc", carType = null) {
 	let query = supabase
 		.from("projects")
