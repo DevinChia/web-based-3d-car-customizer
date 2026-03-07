@@ -9,6 +9,7 @@ export default function Viewer({ modelPath }) {
 		const mount = mountRef.current;
 	
 		const scene = new THREE.Scene();
+		scene.background = new THREE.Color(0xf5f5f5);
 	
 		const camera = new THREE.PerspectiveCamera(
 			75,
@@ -35,11 +36,17 @@ export default function Viewer({ modelPath }) {
 		camera.position.set(0, 2, 5);
 	
 		const controls = new OrbitControls(camera, renderer.domElement);
+		controls.enableDamping = true;
+		controls.dampingFactor = 0.05;
+		controls.minDistance = 2;
+		controls.maxDistance = 10;
 
-		scene.background = new THREE.Color(0xf5f5f5);
-	
-		const light = new THREE.AmbientLight(0xffffff, 1);
-		scene.add(light);
+		const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+		scene.add(ambientLight);
+
+		const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+		directionalLight.position.set(5, 10, 5);
+		scene.add(directionalLight);
 
 		const geometry = new THREE.BoxGeometry();
 		const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
