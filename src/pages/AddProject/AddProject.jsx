@@ -14,6 +14,8 @@ export default function AddProject() {
 	const [errorMsg, setErrorMsg] = useState("");
 	const [showModal, setShowModal] = useState(false);
 
+	const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
 	const showError = (message) => {
 		setErrorMsg(message);
 		setShowModal(true);
@@ -40,12 +42,22 @@ export default function AddProject() {
 			return;
 		}
 
+		if (isUploadModel && modelFile.size > MAX_FILE_SIZE) {
+			showError("Model file is too large. Maximum size is 50 MB.");
+			return;
+		}		
+
 		let modelUrl = null;
 
 		// upload model ke storage
 		if (isUploadModel) {
 			modelUrl = await uploadModel(modelFile);
-		} 
+		
+			if (!modelUrl) {
+				showError("Failed to upload model.");
+				return;
+			}
+		}		
 		// pakai model default
 		else {
 			modelUrl = `/models/${defaultModel}`;
