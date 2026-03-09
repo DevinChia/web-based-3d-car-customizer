@@ -42,6 +42,8 @@ export default function Viewer({ modelPath }) {
 		controls.dampingFactor = 0.05;
 		controls.minDistance = 2;
 		controls.maxDistance = 10;
+		controls.enablePan = true;
+		controls.screenSpacePanning = false;
 
 		const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 		scene.add(ambientLight);

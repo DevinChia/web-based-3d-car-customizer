@@ -49,7 +49,6 @@ export default function AddProject() {
 
 		let modelUrl = null;
 
-		// upload model ke storage
 		if (isUploadModel) {
 			modelUrl = await uploadModel(modelFile);
 		
@@ -58,7 +57,6 @@ export default function AddProject() {
 				return;
 			}
 		}		
-		// pakai model default
 		else {
 			modelUrl = `/models/${defaultModel}`;
 		}
@@ -131,7 +129,7 @@ export default function AddProject() {
 					{isUploadModel && (
 						<div className="upload-file-field add-project-fields">
 							<label>
-								Upload File
+								Upload File (Max File Size: 50MB)
 							</label>
 							<input
 								className="upload-file-input"
