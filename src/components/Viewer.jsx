@@ -3,9 +3,9 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-export default function Viewer({ modelPath }) {
-	console.log(modelPath)
+export default function Viewer({ modelPath, bodyColor }) {
 	const mountRef = useRef(null);
+	const bodyMeshesRef = useRef([]);
 
 	useEffect(() => {
 		const mount = mountRef.current;
@@ -54,25 +54,60 @@ export default function Viewer({ modelPath }) {
 
 		const loader = new GLTFLoader();
 
+		bodyMeshesRef.current = [];
+
 		loader.load(modelPath, (gltf) => {
 			const model = gltf.scene;
-		
-			const box = new THREE.Box3().setFromObject(model);
-			const size = box.getSize(new THREE.Vector3());
-		  
-			const maxDim = Math.max(size.x, size.y, size.z);
+			
+			const totalBox = new THREE.Box3().setFromObject(model);
+			const totalSize = totalBox.getSize(new THREE.Vector3());
+
+			const maxDim = Math.max(totalSize.x, totalSize.y, totalSize.z);
 			const scaleFactor = 3 / maxDim;
 			model.scale.setScalar(scaleFactor);
+
+			const box = new THREE.Box3().setFromObject(model);
+			const size = box.getSize(new THREE.Vector3());
+			const center = box.getCenter(new THREE.Vector3());
+			model.position.sub(center);
+
+			const finalBox = new THREE.Box3().setFromObject(model);
+
+			// const helper = new THREE.Box3Helper(finalBox, 0xff0000);
+			// scene.add(helper);
 		  
-			const box2 = new THREE.Box3().setFromObject(model);
-			const center2 = box2.getCenter(new THREE.Vector3());
-			const size2 = box2.getSize(new THREE.Vector3());
-		  
-			model.position.sub(center2);
-		  
+			model.traverse((child) => {
+				if (child.isMesh) {
+					const mat = child.material;
+
+					if (mat.transparent || mat.opacity < 1) return;
+					if (mat.roughness > 0.5) return;
+
+					const childBox = new THREE.Box3().setFromObject(child);
+					const childCenter = childBox.getCenter(new THREE.Vector3());
+
+					const frontBackLimit = size.z * 0.35;
+
+					const isLow = childCenter.y < finalBox.min.y + size.y * 0.25;
+					const isMiddle = Math.abs(childCenter.z) < frontBackLimit;
+
+					const isWheelArea = isLow && isMiddle;
+
+					// const helper = new THREE.Box3Helper(childBox, isWheelArea ? 0xff0000 : 0x00ff00);
+					// scene.add(helper);
+
+					if (isWheelArea) {
+						return;
+					}
+
+					child.material = mat.clone();
+					bodyMeshesRef.current.push(child);
+				}
+			});
+
 			scene.add(model);
 		  
-			controls.target.set(0, size2.y * 0.3, 0);
+			controls.target.set(0, size.y * 0.3, 0);
 			controls.update();
 		});
 	
@@ -91,7 +126,12 @@ export default function Viewer({ modelPath }) {
 			}
 		};
 	}, [modelPath]);
-	
 
+	useEffect(() => {
+		bodyMeshesRef.current.forEach((mesh) => {
+			mesh.material.color.set(bodyColor);
+		});
+	}, [bodyColor]);	
+	
 	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
 }

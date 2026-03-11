@@ -8,6 +8,7 @@ export default function Customize() {
 	const { id } = useParams();
 	const [project, setProject] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [bodyColor, setBodyColor] = useState("");
 
 	useEffect(() => {
 		const fetchProject = async () => {
@@ -27,7 +28,10 @@ export default function Customize() {
 	return (
 		<div className="viewer-container">
 		  <h1 className="viewer-title">{project.title}</h1>
-		  <Viewer modelPath={modelPath} />
+		  <button className="red-button" onClick={()=>setBodyColor("#ff0000")}>
+			Red
+		</button>
+			<Viewer modelPath={modelPath} bodyColor={bodyColor} />
 		</div>
 	  );	  
 }
