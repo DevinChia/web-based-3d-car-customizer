@@ -2,10 +2,12 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { roughness } from "three/tsl";
 
-export default function Viewer({ modelPath, bodyColor }) {
+export default function Viewer({ modelPath, bodyColor, rimColor }) {
 	const mountRef = useRef(null);
 	const bodyMeshesRef = useRef([]);
+	const rimMeshesRef = useRef([]);
 
 	useEffect(() => {
 		const mount = mountRef.current;
@@ -55,6 +57,7 @@ export default function Viewer({ modelPath, bodyColor }) {
 		const loader = new GLTFLoader();
 
 		bodyMeshesRef.current = [];
+		rimMeshesRef.current = [];
 
 		loader.load(modelPath, (gltf) => {
 			const model = gltf.scene;
@@ -75,16 +78,19 @@ export default function Viewer({ modelPath, bodyColor }) {
 
 			// const helper = new THREE.Box3Helper(finalBox, 0xff0000);
 			// scene.add(helper);
+
+			const bodyMeshes = [];
+			const wheelMeshes = [];
 		  
 			model.traverse((child) => {
 				if (child.isMesh) {
 					const mat = child.material;
 
 					if (mat.transparent || mat.opacity < 1) return;
-					if (mat.roughness > 0.5) return;
 
 					const childBox = new THREE.Box3().setFromObject(child);
 					const childCenter = childBox.getCenter(new THREE.Vector3());
+					const childSize = childBox.getSize(new THREE.Vector3());
 
 					const frontBackLimit = size.z * 0.35;
 
@@ -93,15 +99,114 @@ export default function Viewer({ modelPath, bodyColor }) {
 
 					const isWheelArea = isLow && isMiddle;
 
-					// const helper = new THREE.Box3Helper(childBox, isWheelArea ? 0xff0000 : 0x00ff00);
-					// scene.add(helper);
-
-					if (isWheelArea) {
-						return;
-					}
+					const helper = new THREE.Box3Helper(childBox, isWheelArea ? 0xff0000 : 0x00ff00);
+					scene.add(helper);
 
 					child.material = mat.clone();
-					bodyMeshesRef.current.push(child);
+					
+					if (isWheelArea) {
+						wheelMeshes.push(child);
+					}
+					else {
+						bodyMeshes.push(child);
+					}
+				}
+			});
+
+			let keywordCount = 0;
+
+			const bodyKeywords = [
+				"body",
+				"paint",
+				"door",
+				"hood",
+				"bonnet",
+				"fender"
+			]
+
+			const excludedBodyKeywords = [
+				"glass",
+				"window",
+				"mirror",
+				"seat",
+				"interior",
+				"dashboard",
+				"exhaust",
+				"engine",
+				"light",
+				"lamp"
+			]
+
+			const containsKeyword = (text, keywords) => keywords.some(keyword => text.includes(keyword));
+
+			bodyMeshes.forEach((mesh) => {
+				const meshName = mesh.name.toLowerCase();
+				const matName = mesh.material.name.toLowerCase();
+
+				if (
+					containsKeyword(meshName, bodyKeywords) ||
+					containsKeyword(matName, bodyKeywords)
+				) {
+					keywordCount++;
+				}
+			});
+
+			const keywordRatio = keywordCount / bodyMeshes.length;
+			const useNameFilter = keywordRatio > 0.5;
+
+			bodyMeshes.forEach((mesh) => {
+				const meshName = mesh.name.toLowerCase();
+				const matName = mesh.material.name.toLowerCase();
+			
+				const isNonPaintPart =
+					containsKeyword(meshName, excludedBodyKeywords) ||
+					containsKeyword(matName, excludedBodyKeywords);
+			
+				if (useNameFilter) {
+					if (isNonPaintPart) return;
+					bodyMeshesRef.current.push(mesh);
+				}
+				else {
+					if (
+						mesh.material.roughness < 0.5
+					) {
+						bodyMeshesRef.current.push(mesh);
+					}
+				}
+			});
+
+			let hasTireKeyword = false;
+
+			wheelMeshes.forEach((mesh) => {
+				const meshName = mesh.name.toLowerCase();
+				const matName = mesh.material.name.toLowerCase();
+				if (
+					meshName.includes("tire") ||
+					meshName.includes("tyre") ||
+					matName.includes("tire") ||
+					matName.includes("tyre")
+				) {
+					hasTireKeyword = true;
+				}
+			});
+
+			wheelMeshes.forEach((mesh) => {
+				const meshName = mesh.name.toLowerCase();
+				const matName = mesh.material.name.toLowerCase();
+
+				const isTire =
+					meshName.includes("tire") ||
+					meshName.includes("tyre") ||
+					matName.includes("tire") ||
+					matName.includes("tyre");
+
+				if (hasTireKeyword) {
+					if (isTire) return;
+					rimMeshesRef.current.push(mesh);
+				} else {
+					if (mesh.material.metalness > 0.3 && mesh.material.roughness < 0.31) {
+						rimMeshesRef.current.push(mesh);
+					}
 				}
 			});
 
@@ -131,7 +236,14 @@ export default function Viewer({ modelPath, bodyColor }) {
 		bodyMeshesRef.current.forEach((mesh) => {
 			mesh.material.color.set(bodyColor);
 		});
-	}, [bodyColor]);	
+	}, [bodyColor]);
+	
+	useEffect(() => {
+		rimMeshesRef.current.forEach((mesh) => {
+			mesh.material.map = null;
+			mesh.material.color.set(rimColor);
+		});
+	}, [rimColor]);	
 	
 	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
 }

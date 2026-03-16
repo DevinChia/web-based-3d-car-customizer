@@ -9,6 +9,7 @@ export default function Customize() {
 	const [project, setProject] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [bodyColor, setBodyColor] = useState("");
+	const [rimColor, setRimColor] = useState("");
 
 	useEffect(() => {
 		const fetchProject = async () => {
@@ -27,11 +28,14 @@ export default function Customize() {
 
 	return (
 		<div className="viewer-container">
-		  <h1 className="viewer-title">{project.title}</h1>
-		  <button className="red-button" onClick={()=>setBodyColor("#ff0000")}>
-			Red
-		</button>
-			<Viewer modelPath={modelPath} bodyColor={bodyColor} />
+			<h1 className="viewer-title">{project.title}</h1>
+			<button className="red-button" onClick={()=>setBodyColor("#ff0000")}>
+				Red body
+			</button>
+			<button className="red-rim-button" onClick={()=>setRimColor("#ff0000")}>
+				Red rim
+			</button>
+			<Viewer modelPath={modelPath} bodyColor={bodyColor} rimColor={rimColor}/>
 		</div>
-	  );	  
+	);
 }
