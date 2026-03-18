@@ -99,8 +99,8 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 
 					const isWheelArea = isLow && isMiddle;
 
-					const helper = new THREE.Box3Helper(childBox, isWheelArea ? 0xff0000 : 0x00ff00);
-					scene.add(helper);
+					// const helper = new THREE.Box3Helper(childBox, isWheelArea ? 0xff0000 : 0x00ff00);
+					// scene.add(helper);
 
 					child.material = mat.clone();
 					
@@ -113,7 +113,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 				}
 			});
 
-			let keywordCount = 0;
+			let bodyKeywordCount = 0;
 
 			const bodyKeywords = [
 				"body",
@@ -147,12 +147,12 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 					containsKeyword(meshName, bodyKeywords) ||
 					containsKeyword(matName, bodyKeywords)
 				) {
-					keywordCount++;
+					bodyKeywordCount++;
 				}
 			});
 
-			const keywordRatio = keywordCount / bodyMeshes.length;
-			const useNameFilter = keywordRatio > 0.5;
+			const bodyKeywordRatio = bodyKeywordCount / bodyMeshes.length;
+			const bodyUseNameFilter = bodyKeywordRatio > 0.5;
 
 			bodyMeshes.forEach((mesh) => {
 				const meshName = mesh.name.toLowerCase();
@@ -162,7 +162,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 					containsKeyword(meshName, excludedBodyKeywords) ||
 					containsKeyword(matName, excludedBodyKeywords);
 			
-				if (useNameFilter) {
+				if (bodyUseNameFilter) {
 					if (isNonPaintPart) return;
 					bodyMeshesRef.current.push(mesh);
 				}
@@ -174,41 +174,107 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 					}
 				}
 			});
+			
+			const wheelCandidates = wheelMeshes.map(mesh => {
+				const box = new THREE.Box3().setFromObject(mesh);
+				const sizeVec = box.getSize(new THREE.Vector3());
 
-			let hasTireKeyword = false;
+				const size = Math.max(sizeVec.x, sizeVec.y, sizeVec.z); // dominant size
 
-			wheelMeshes.forEach((mesh) => {
-				const meshName = mesh.name.toLowerCase();
-				const matName = mesh.material.name.toLowerCase();
-				if (
-					meshName.includes("tire") ||
-					meshName.includes("tyre") ||
-					matName.includes("tire") ||
-					matName.includes("tyre")
-				) {
-					hasTireKeyword = true;
-				}
+				return { mesh, size };
 			});
 
-			wheelMeshes.forEach((mesh) => {
-				const meshName = mesh.name.toLowerCase();
-				const matName = mesh.material.name.toLowerCase();
+			const groupSizes = (items, tolerance = 0.01) => {
+				const groups = [];
 
-				const isTire =
-					meshName.includes("tire") ||
-					meshName.includes("tyre") ||
-					matName.includes("tire") ||
-					matName.includes("tyre");
+				items.forEach(item => {
+					let found = false;
 
-				if (hasTireKeyword) {
-					if (isTire) return;
-					rimMeshesRef.current.push(mesh);
-				} else {
-					if (mesh.material.metalness > 0.3 && mesh.material.roughness < 0.31) {
-						rimMeshesRef.current.push(mesh);
+					for (let group of groups) {
+						if (Math.abs(group[0].size - item.size) < tolerance) {
+							group.push(item);
+							found = true;
+							break;
+						}
 					}
+
+					if (!found) {
+						groups.push([item]);
+					}
+				});
+
+				return groups;
+			};
+
+			let groups = groupSizes(wheelCandidates);
+			groups = groups.filter(group => group.length >= 2);
+
+			let rimFound = false;
+			if (groups.length >= 2) {
+				groups.sort((a, b) => b[0].size - a[0].size);
+
+				let tireGroup = groups[0];
+				let rimGroup = groups.find((group, index) => {
+					if (index === 0) return false;
+
+					return Math.abs(group[0].size - tireGroup[0].size) > 0.02;
+				});
+
+				if (rimGroup) {
+					rimGroup.forEach(({ mesh }) => {
+						rimMeshesRef.current.push(mesh);
+					});
+					rimFound = true;
 				}
-			});
+			}
+			if (!rimFound) {
+				let wheelKeywordCount = 0;
+
+				const wheelKeywords = ["wheel", "rim", "alloy", "disk", "disc"];
+				const excludedWheelKeywords = ["tire", "tyre", "brake"];
+
+				wheelMeshes.forEach((mesh) => {
+					const meshName = mesh.name.toLowerCase();
+					const matName = mesh.material.name.toLowerCase();
+
+					if (
+						containsKeyword(meshName, wheelKeywords) ||
+						containsKeyword(matName, wheelKeywords)
+					) {
+						wheelKeywordCount++;
+					}
+				});
+
+				const wheelKeywordRatio = wheelKeywordCount / wheelMeshes.length;
+				const wheelUseNameFilter = wheelKeywordRatio > 0.4;
+
+				wheelMeshes.forEach((mesh) => {
+					const meshName = mesh.name.toLowerCase();
+					const matName = mesh.material.name.toLowerCase();
+
+					const hasWheelWord =
+						containsKeyword(meshName, wheelKeywords) ||
+						containsKeyword(matName, wheelKeywords);
+
+					const hasExcludedWord =
+						containsKeyword(meshName, excludedWheelKeywords) ||
+						containsKeyword(matName, excludedWheelKeywords);
+
+					const isNotRim = hasExcludedWord && !hasWheelWord;
+
+					if (wheelUseNameFilter) {
+						if (isNotRim) return;
+						rimMeshesRef.current.push(mesh);
+					} else {
+						if (
+							mesh.material.metalness > 0.6 &&
+							mesh.material.roughness < 0.4
+						) {
+							rimMeshesRef.current.push(mesh);
+						}
+					}
+				});
+			}
 
 			scene.add(model);
 		  
