@@ -2,7 +2,6 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { roughness } from "three/tsl";
 
 export default function Viewer({ modelPath, bodyColor, rimColor }) {
 	const mountRef = useRef(null);
@@ -13,7 +12,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 		const mount = mountRef.current;
 	
 		const scene = new THREE.Scene();
-		scene.background = new THREE.Color(0xf5f5f5);
+		scene.background = new THREE.Color(0xEDEDED);
 	
 		const camera = new THREE.PerspectiveCamera(
 			75,
@@ -90,7 +89,6 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 
 					const childBox = new THREE.Box3().setFromObject(child);
 					const childCenter = childBox.getCenter(new THREE.Vector3());
-					const childSize = childBox.getSize(new THREE.Vector3());
 
 					const frontBackLimit = size.z * 0.35;
 
@@ -104,177 +102,13 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 
 					child.material = mat.clone();
 					
-					if (isWheelArea) {
-						wheelMeshes.push(child);
-					}
-					else {
-						bodyMeshes.push(child);
-					}
+					if (isWheelArea) wheelMeshes.push(child);
+					else bodyMeshes.push(child);
 				}
 			});
 
-			let bodyKeywordCount = 0;
-
-			const bodyKeywords = [
-				"body",
-				"paint",
-				"door",
-				"hood",
-				"bonnet",
-				"fender"
-			]
-
-			const excludedBodyKeywords = [
-				"glass",
-				"window",
-				"mirror",
-				"seat",
-				"interior",
-				"dashboard",
-				"exhaust",
-				"engine",
-				"light",
-				"lamp"
-			]
-
-			const containsKeyword = (text, keywords) => keywords.some(keyword => text.includes(keyword));
-
-			bodyMeshes.forEach((mesh) => {
-				const meshName = mesh.name.toLowerCase();
-				const matName = mesh.material.name.toLowerCase();
-
-				if (
-					containsKeyword(meshName, bodyKeywords) ||
-					containsKeyword(matName, bodyKeywords)
-				) {
-					bodyKeywordCount++;
-				}
-			});
-
-			const bodyKeywordRatio = bodyKeywordCount / bodyMeshes.length;
-			const bodyUseNameFilter = bodyKeywordRatio > 0.5;
-
-			bodyMeshes.forEach((mesh) => {
-				const meshName = mesh.name.toLowerCase();
-				const matName = mesh.material.name.toLowerCase();
-			
-				const isNonPaintPart =
-					containsKeyword(meshName, excludedBodyKeywords) ||
-					containsKeyword(matName, excludedBodyKeywords);
-			
-				if (bodyUseNameFilter) {
-					if (isNonPaintPart) return;
-					bodyMeshesRef.current.push(mesh);
-				}
-				else {
-					if (
-						mesh.material.roughness < 0.5
-					) {
-						bodyMeshesRef.current.push(mesh);
-					}
-				}
-			});
-			
-			const wheelCandidates = wheelMeshes.map(mesh => {
-				const box = new THREE.Box3().setFromObject(mesh);
-				const sizeVec = box.getSize(new THREE.Vector3());
-
-				const size = Math.max(sizeVec.x, sizeVec.y, sizeVec.z); // dominant size
-
-				return { mesh, size };
-			});
-
-			const groupSizes = (items, tolerance = 0.01) => {
-				const groups = [];
-
-				items.forEach(item => {
-					let found = false;
-
-					for (let group of groups) {
-						if (Math.abs(group[0].size - item.size) < tolerance) {
-							group.push(item);
-							found = true;
-							break;
-						}
-					}
-
-					if (!found) {
-						groups.push([item]);
-					}
-				});
-
-				return groups;
-			};
-
-			let groups = groupSizes(wheelCandidates);
-			groups = groups.filter(group => group.length >= 2);
-
-			let rimFound = false;
-			if (groups.length >= 2) {
-				groups.sort((a, b) => b[0].size - a[0].size);
-
-				let tireGroup = groups[0];
-				let rimGroup = groups.find((group, index) => {
-					if (index === 0) return false;
-
-					return Math.abs(group[0].size - tireGroup[0].size) > 0.02;
-				});
-
-				if (rimGroup) {
-					rimGroup.forEach(({ mesh }) => {
-						rimMeshesRef.current.push(mesh);
-					});
-					rimFound = true;
-				}
-			}
-			if (!rimFound) {
-				let wheelKeywordCount = 0;
-
-				const wheelKeywords = ["wheel", "rim", "alloy", "disk", "disc"];
-				const excludedWheelKeywords = ["tire", "tyre", "brake"];
-
-				wheelMeshes.forEach((mesh) => {
-					const meshName = mesh.name.toLowerCase();
-					const matName = mesh.material.name.toLowerCase();
-
-					if (
-						containsKeyword(meshName, wheelKeywords) ||
-						containsKeyword(matName, wheelKeywords)
-					) {
-						wheelKeywordCount++;
-					}
-				});
-
-				const wheelKeywordRatio = wheelKeywordCount / wheelMeshes.length;
-				const wheelUseNameFilter = wheelKeywordRatio > 0.4;
-
-				wheelMeshes.forEach((mesh) => {
-					const meshName = mesh.name.toLowerCase();
-					const matName = mesh.material.name.toLowerCase();
-
-					const hasWheelWord =
-						containsKeyword(meshName, wheelKeywords) ||
-						containsKeyword(matName, wheelKeywords);
-
-					const hasExcludedWord =
-						containsKeyword(meshName, excludedWheelKeywords) ||
-						containsKeyword(matName, excludedWheelKeywords);
-
-					const isNotRim = hasExcludedWord && !hasWheelWord;
-
-					if (wheelUseNameFilter) {
-						if (isNotRim) return;
-						rimMeshesRef.current.push(mesh);
-					} else {
-						if (
-							mesh.material.metalness > 0.6 &&
-							mesh.material.roughness < 0.4
-						) {
-							rimMeshesRef.current.push(mesh);
-						}
-					}
-				});
-			}
+			bodyMeshesRef.current = detectBodyMeshes(bodyMeshes);
+			rimMeshesRef.current = detectRimMeshes(wheelMeshes);
 
 			scene.add(model);
 		  
@@ -312,4 +146,162 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 	}, [rimColor]);	
 	
 	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
+}
+
+const containsKeyword = (text, keywords) => keywords.some(keyword => text.includes(keyword));
+
+const groupSizes = (items, tolerance = 0.01) => {
+	const groups = [];
+
+	items.forEach(item => {
+		let found = false;
+
+		for (let group of groups) {
+			if (Math.abs(group[0].size - item.size) < tolerance) {
+				group.push(item);
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			groups.push([item]);
+		}
+	});
+
+	return groups;
+};
+
+function detectBodyMeshes(bodyMeshes) {
+	let result = [];
+
+	const bodyKeywords = [
+		"body", "paint", "door", "hood", "bonnet", "fender"
+	];
+
+	const excludedBodyKeywords = [
+		"glass", "window", "mirror", "seat", "interior",
+		"dashboard", "exhaust", "engine", "light", "lamp"
+	];
+
+	let bodyKeywordCount = 0;
+
+	bodyMeshes.forEach((mesh) => {
+		const meshName = mesh.name.toLowerCase();
+		const matName = mesh.material.name.toLowerCase();
+
+		if (
+			containsKeyword(meshName, bodyKeywords) ||
+			containsKeyword(matName, bodyKeywords)
+		) {
+			bodyKeywordCount++;
+		}
+	});
+
+	const bodyKeywordRatio = bodyKeywordCount / bodyMeshes.length;
+	const bodyUseNameFilter = bodyKeywordRatio > 0.6;
+
+	bodyMeshes.forEach((mesh) => {
+		const meshName = mesh.name.toLowerCase();
+		const matName = mesh.material.name.toLowerCase();
+
+		const isNonPaintPart =
+			containsKeyword(meshName, excludedBodyKeywords) ||
+			containsKeyword(matName, excludedBodyKeywords);
+
+		if (bodyUseNameFilter) {
+			if (isNonPaintPart) return;
+			result.push(mesh);
+		} else {
+			if (mesh.material.roughness < 0.5) {
+				result.push(mesh);
+			}
+		}
+	});
+
+	return result;
+}
+
+function detectRimMeshes(wheelMeshes) {
+	let rimMeshes = [];
+
+	const wheelCandidates = wheelMeshes.map(mesh => {
+		const box = new THREE.Box3().setFromObject(mesh);
+		const sizeVec = box.getSize(new THREE.Vector3());
+		const size = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
+
+		return { mesh, size };
+	});
+
+	let groups = groupSizes(wheelCandidates);
+	groups = groups.filter(group => group.length >= 4);
+
+	let rimFound = false;
+
+	if (groups.length >= 2) {
+		groups.sort((a, b) => b[0].size - a[0].size);
+
+		let tireGroup = groups[0];
+
+		let rimGroup = groups.find((group, index) => {
+			if (index === 0) return false;
+			return Math.abs(group[0].size - tireGroup[0].size) > 0.02;
+		});
+
+		if (rimGroup) {
+			rimGroup.forEach(({ mesh }) => rimMeshes.push(mesh));
+			rimFound = true;
+		}
+	}
+
+	if (!rimFound) {
+		const wheelKeywords = ["wheel", "rim", "alloy", "disk", "disc"];
+		const excludedWheelKeywords = ["tire", "tyre", "brake"];
+
+		let wheelKeywordCount = 0;
+
+		wheelMeshes.forEach((mesh) => {
+			const meshName = mesh.name.toLowerCase();
+			const matName = mesh.material.name.toLowerCase();
+
+			if (
+				containsKeyword(meshName, wheelKeywords) ||
+				containsKeyword(matName, wheelKeywords)
+			) {
+				wheelKeywordCount++;
+			}
+		});
+
+		const wheelKeywordRatio = wheelKeywordCount / wheelMeshes.length;
+		const wheelUseNameFilter = wheelKeywordRatio > 0.4;
+
+		wheelMeshes.forEach((mesh) => {
+			const meshName = mesh.name.toLowerCase();
+			const matName = mesh.material.name.toLowerCase();
+
+			const hasWheelWord =
+				containsKeyword(meshName, wheelKeywords) ||
+				containsKeyword(matName, wheelKeywords);
+
+			const hasExcludedWord =
+				containsKeyword(meshName, excludedWheelKeywords) ||
+				containsKeyword(matName, excludedWheelKeywords);
+
+			const isNotRim = hasExcludedWord && !hasWheelWord;
+
+			if (wheelUseNameFilter) {
+				if (isNotRim) return;
+				rimMeshes.push(mesh);
+			} else {
+				if (
+					mesh.material.metalness > 0.6 &&
+					mesh.material.roughness < 0.4
+				) {
+					rimMeshes.push(mesh);
+				}
+			}
+		});
+	}
+
+	return rimMeshes;
 }

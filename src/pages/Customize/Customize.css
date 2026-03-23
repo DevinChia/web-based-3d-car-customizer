@@ -1,24 +1,76 @@
 .viewer-container {
-	position: relative;
+	display: flex;
 	width: 100vw;
 	height: 100vh;
 }
 
-.viewer-title,
-.red-button {
-	position: absolute;
-	top: 20px;
-	left: 50%;
-	transform: translateX(-50%);
+.sidebar {
+	width: 20rem;
+	background-color: var(--color-1);
+	color: var(--font-color-1);
+	padding: 3.125rem;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 }
 
-.red-rim-button {
-	position: absolute;
-	top: 40px;
-	left: 50%;
-	transform: translateX(-50%);
+.sidebar-title {
+	margin: 0;
+	font-size: 18px;
+}
+
+.section-title {
+	margin-top: 10px;
+	font-weight: bold;
+}
+
+.parts-container {
+	display: flex;
+	gap: 10px;
+}
+
+.part-button {
+	flex: 1;
+	padding: 8px;
+	background: var(--color-4);
+	color: var(--font-color-2);
+	border: none;
+	cursor: pointer;
+	border-radius: 5px;
+}
+
+.part-button.active {
+	background-color: var(--color-2);
+}
+
+.color-picker {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+}
+
+.color-history {
+	display: flex;
+	gap: 8px;
+	margin-bottom: 10px;
+}
+
+.preset-colors {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-top: 10px;
+}
+
+.color-box {
+	width: 25px;
+	height: 25px;
+	cursor: pointer;
+	border-radius: 4px;
+	border: 2px solid #ccc;
 }
 
 .viewer-container canvas {
+	flex: 1;
 	display: block;
 }

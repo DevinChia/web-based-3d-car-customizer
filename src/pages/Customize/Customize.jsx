@@ -10,6 +10,16 @@ export default function Customize() {
 	const [loading, setLoading] = useState(true);
 	const [bodyColor, setBodyColor] = useState("");
 	const [rimColor, setRimColor] = useState("");
+	const [selectedPart, setSelectedPart] = useState("body");
+	const [colorHistory, setColorHistory] = useState([]);
+	const [tempColor, setTempColor] = useState("#ffffff");
+
+	const addToHistory = (color) => {
+		setColorHistory((prev) => {
+			const newHistory = [color, ...prev.filter((c) => c !== color)];
+			return newHistory.slice(0, 4);
+		});
+	};
 
 	useEffect(() => {
 		const fetchProject = async () => {
@@ -28,14 +38,87 @@ export default function Customize() {
 
 	return (
 		<div className="viewer-container">
-			<h1 className="viewer-title">{project.title}</h1>
-			<button className="red-button" onClick={()=>setBodyColor("#ff0000")}>
-				Red body
-			</button>
-			<button className="red-rim-button" onClick={()=>setRimColor("#ff0000")}>
-				Red rim
-			</button>
-			<Viewer modelPath={modelPath} bodyColor={bodyColor} rimColor={rimColor}/>
+	
+			<div className="sidebar">
+				<h2 className="sidebar-title">{project.title}</h2>
+	
+				<hr />
+	
+				<p className="section-title">Parts</p>
+				<div className="parts-container">
+					<button
+						className={`part-button ${selectedPart === "body" ? "active" : ""}`}
+						onClick={() => setSelectedPart("body")}
+					>
+						Body
+					</button>
+	
+					<button
+						className={`part-button ${selectedPart === "rim" ? "active" : ""}`}
+						onClick={() => setSelectedPart("rim")}
+					>
+						Rim
+					</button>
+				</div>
+	
+				<hr />
+	
+				<p className="section-title">Color</p>
+
+				<div className="color-picker">
+					<input
+						type="color"
+						value={tempColor}
+						onChange={(e) => {
+							const color = e.target.value;
+							setTempColor(color);
+
+							if (selectedPart === "body") setBodyColor(color);
+							else setRimColor(color);
+						}}
+						onBlur={() => {
+							addToHistory(tempColor);
+						}}
+					/>
+					<p>Choose a color</p>
+				</div>
+
+				<div className="color-history">
+					{colorHistory.map((color) => (
+						<div
+							key={color}
+							className="color-box"
+							style={{ backgroundColor: color }}
+							onClick={() => {
+								if (selectedPart === "body") setBodyColor(color);
+								else setRimColor(color);
+							}}
+						/>
+					))}
+				</div>
+
+				<div className="preset-colors">
+					{["#ff0000", "#0000ff", "#00ff00", "#000000", "#ffffff"].map((color) => (
+						<div
+							key={color}
+							className="color-box"
+							style={{ backgroundColor: color }}
+							onClick={() => {
+								addToHistory(color);
+							
+								if (selectedPart === "body") setBodyColor(color);
+								else setRimColor(color);
+							}}							
+						/>
+					))}
+				</div>
+			</div>
+	
+			<Viewer
+				modelPath={modelPath}
+				bodyColor={bodyColor}
+				rimColor={rimColor}
+			/>
 		</div>
 	);
 }
