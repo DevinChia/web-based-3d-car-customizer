@@ -39,7 +39,6 @@ export default function Customize() {
 	return (
 		<div className="viewer-container">
 	
-			{/* LEFT SIDEBAR */}
 			<div className="sidebar">
 				<h2 className="sidebar-title">{project.title}</h2>
 	
@@ -115,7 +114,6 @@ export default function Customize() {
 				</div>
 			</div>
 	
-			{/* VIEWER */}
 			<Viewer
 				modelPath={modelPath}
 				bodyColor={bodyColor}

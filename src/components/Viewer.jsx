@@ -199,7 +199,7 @@ function detectBodyMeshes(bodyMeshes) {
 	});
 
 	const bodyKeywordRatio = bodyKeywordCount / bodyMeshes.length;
-	const bodyUseNameFilter = bodyKeywordRatio > 0.5;
+	const bodyUseNameFilter = bodyKeywordRatio > 0.6;
 
 	bodyMeshes.forEach((mesh) => {
 		const meshName = mesh.name.toLowerCase();
@@ -234,7 +234,7 @@ function detectRimMeshes(wheelMeshes) {
 	});
 
 	let groups = groupSizes(wheelCandidates);
-	groups = groups.filter(group => group.length >= 2);
+	groups = groups.filter(group => group.length >= 4);
 
 	let rimFound = false;
 
