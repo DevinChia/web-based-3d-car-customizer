@@ -110,6 +110,19 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			bodyMeshesRef.current = detectBodyMeshes(bodyMeshes);
 			rimMeshesRef.current = detectRimMeshes(wheelMeshes);
 
+			if (bodyColor) {
+				bodyMeshesRef.current.forEach((mesh) => {
+					mesh.material.color.set(bodyColor);
+				});
+			}
+
+			if (rimColor) {
+				rimMeshesRef.current.forEach((mesh) => {
+					mesh.material.map = null;
+					mesh.material.color.set(rimColor);
+				});
+			}
+
 			scene.add(model);
 		  
 			controls.target.set(0, size.y * 0.3, 0);
@@ -133,12 +146,14 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 	}, [modelPath]);
 
 	useEffect(() => {
+		if (bodyMeshesRef.current.length === 0) return;
 		bodyMeshesRef.current.forEach((mesh) => {
 			mesh.material.color.set(bodyColor);
 		});
 	}, [bodyColor]);
 	
 	useEffect(() => {
+		if (rimMeshesRef.current.length === 0) return;
 		rimMeshesRef.current.forEach((mesh) => {
 			mesh.material.map = null;
 			mesh.material.color.set(rimColor);
