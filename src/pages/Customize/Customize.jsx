@@ -1,7 +1,7 @@
 import "./Customize.css";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProjectById } from "../../services/projectService";
+import { getProjectById, updateProject } from "../../services/projectService";
 import Viewer from "../../components/Viewer";
 
 export default function Customize() {
@@ -10,9 +10,12 @@ export default function Customize() {
 	const [loading, setLoading] = useState(true);
 	const [bodyColor, setBodyColor] = useState("");
 	const [rimColor, setRimColor] = useState("");
+	const [originalBodyColor, setOriginalBodyColor] = useState("");
+	const [originalRimColor, setOriginalRimColor] = useState("");
 	const [selectedPart, setSelectedPart] = useState("body");
 	const [colorHistory, setColorHistory] = useState([]);
 	const [tempColor, setTempColor] = useState("#ffffff");
+	const [isSaving, setIsSaving] = useState(false);
 
 	const addToHistory = (color) => {
 		setColorHistory((prev) => {
@@ -21,20 +24,95 @@ export default function Customize() {
 		});
 	};
 
+	const [toast, setToast] = useState({
+		show: false,
+		message: "",
+		type: "success",
+	});	
+
 	useEffect(() => {
 		const fetchProject = async () => {
 			const data = await getProjectById(id);
 			setProject(data);
+
+			setBodyColor(data.body_color);
+			setRimColor(data.rim_color);
+
+			setOriginalBodyColor(data.body_color);
+			setOriginalRimColor(data.rim_color);
+	
 			setLoading(false);
 		};
 
 		fetchProject();
 	}, [id]);
 
+	useEffect(() => {
+		if (toast.show) {
+			const timer = setTimeout(() => {
+				setToast((prev) => ({ ...prev, show: false }));
+			}, 3000);
+	
+			return () => clearTimeout(timer);
+		}
+	}, [toast.show]);
+
 	if (loading) return <p>Loading...</p>;
 	if (!project) return <p>Project tidak ditemukan.</p>;
 
 	const modelPath = project.model_url;
+
+	const showToast = (message, type = "success") => {
+		if (toast.show) {
+			setToast((prev) => ({ ...prev, show: false }));
+	
+			setTimeout(() => {
+				setToast({
+					show: true,
+					message,
+					type,
+				});
+			}, 400);
+		} else {
+			setToast({
+				show: true,
+				message,
+				type,
+			});
+		}
+	};
+
+	const handleSave = async () => {
+		const isChanged =
+			bodyColor !== originalBodyColor ||
+			rimColor !== originalRimColor;
+	
+		if (!isChanged) {
+			showToast("No changes to save", "info");
+			return;
+		}
+	
+		setIsSaving(true);
+	
+		const result = await updateProject(id, {
+			body_color: bodyColor,
+			rim_color: rimColor,
+			updated_at: new Date().toISOString(),
+		});
+	
+		if (!result) {
+			setIsSaving(false);
+			showToast("Failed to save", "error");
+			return;
+		}
+	
+		setOriginalBodyColor(bodyColor);
+		setOriginalRimColor(rimColor);
+	
+		showToast("Saved successfully!", "success");
+	
+		setIsSaving(false);
+	};	
 
 	return (
 		<div className="viewer-container">
@@ -112,6 +190,10 @@ export default function Customize() {
 						/>
 					))}
 				</div>
+
+				<button onClick={handleSave} className="save-button">
+					Save
+				</button>
 			</div>
 	
 			<Viewer
@@ -119,6 +201,11 @@ export default function Customize() {
 				bodyColor={bodyColor}
 				rimColor={rimColor}
 			/>
+
+			<div className={`toast ${toast.show ? "show" : ""} ${toast.type}`}>
+				{toast.message}
+			</div>
+			{isSaving && <div className="overlay"></div>}
 		</div>
 	);
 }

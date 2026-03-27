@@ -86,3 +86,18 @@ export async function getAllProjects(sortBy = "created_at", order = "desc", carT
 
 	return data;
 }
+
+export async function updateProject(id, updates) {
+	const { data, error } = await supabase
+		.from("projects")
+		.update(updates)
+		.eq("id", id)
+		.select();
+
+	if (error) {
+		console.error("Update error:", error);
+		return null;
+	}
+
+	return data[0];
+}
