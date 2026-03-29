@@ -1,6 +1,5 @@
 import { supabase } from "./supabaseClient";
 
-// Cek apakah title sudah ada
 export async function isTitleDuplicate(title) {
 	const { data, error } = await supabase
 		.from("projects")
@@ -16,12 +15,11 @@ export async function isTitleDuplicate(title) {
 	return data.length > 0;
 }
 
-// Tambah project baru
 export async function createProject(project) {
 	const { data, error } = await supabase
 		.from("projects")
 		.insert([project])
-		.select(); // ambil data yang baru saja diinsert
+		.select();
 
 	if (error) {
 		console.error("Supabase error:", error);
@@ -100,4 +98,47 @@ export async function updateProject(id, updates) {
 	}
 
 	return data[0];
+}
+
+export async function deleteProject(id) {
+	const { data: project, error: fetchError } = await supabase
+		.from("projects")
+		.select("model_url, upload_model")
+		.eq("id", id)
+		.single();
+
+	if (fetchError) {
+		console.error("Fetch error:", fetchError);
+		return false;
+	}
+
+	if (project.upload_model && project.model_url) {
+		try {
+			const fileName = project.model_url.split("/").pop();
+
+			const { error: deleteFileError } = await supabase.storage
+				.from("models")
+				.remove([fileName]);
+
+			if (deleteFileError) {
+				console.error("Delete file error:", deleteFileError);
+				return false;
+			}
+		} catch (err) {
+			console.error("Error parsing file:", err);
+			return false;
+		}
+	}
+
+	const { error: deleteError } = await supabase
+		.from("projects")
+		.delete()
+		.eq("id", id);
+
+	if (deleteError) {
+		console.error("Delete project error:", deleteError);
+		return false;
+	}
+
+	return true;
 }

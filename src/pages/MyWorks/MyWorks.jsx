@@ -1,7 +1,7 @@
 import "./MyWorks.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllProjects } from "../../services/projectService";
+import { getAllProjects, deleteProject } from "../../services/projectService";
 
 export default function MyWorks() {
 	const [projects, setProjects] = useState([]);
@@ -11,8 +11,30 @@ export default function MyWorks() {
 	const navigate = useNavigate();
 
 	const handleEdit = (id) => {
-	navigate(`/customize/${id}`);
+		navigate(`/customize/${id}`);
 	};
+
+	const handleDelete = async (id) => {
+		const confirmDelete = window.confirm("Are you sure you want to delete this project?");
+		if (!confirmDelete) return;
+	
+		const success = await deleteProject(id);
+	
+		if (!success) {
+			alert("Gagal delete project");
+			return;
+		}
+	
+		setProjects((prev) => prev.filter((p) => p.id !== id));
+	};
+
+	const formatDate = (date) => {
+		const d = new Date(date);
+		const day = String(d.getDate()).padStart(2, "0");
+		const month = String(d.getMonth() + 1).padStart(2, "0");
+		const year = d.getFullYear();
+		return `${day}-${month}-${year}`;
+	};	
 
 	useEffect(() => {
 		const fetchProjects = async () => {
@@ -55,10 +77,15 @@ export default function MyWorks() {
 					<div key={project.id} className="project-card">
 						<h3>{project.title}</h3>
 						<p>Car Type: {project.car_type}</p>
-						<p>Created: {new Date(project.created_at).toLocaleString()}</p>
-						<button onClick={() => handleEdit(project.id)}>
-							Edit Project
-						</button>
+						<p>Created: {formatDate(project.created_at)}</p>
+						<div className="project-card-actions">
+							<button onClick={() => handleEdit(project.id)}>
+								Edit Project
+							</button>
+							<button onClick={() => handleDelete(project.id)}>
+								Delete Project
+							</button>
+						</div>
 					</div>
 				))}
 			</div>

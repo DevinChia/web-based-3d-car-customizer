@@ -139,6 +139,10 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 	
 		return () => {
 			window.removeEventListener("resize", handleResize);
+		  
+			// controls.dispose();
+			// renderer.dispose();
+
 			if (mount && renderer.domElement) {
 				mount.removeChild(renderer.domElement);
 			}
@@ -158,7 +162,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			mesh.material.map = null;
 			mesh.material.color.set(rimColor);
 		});
-	}, [rimColor]);	
+	}, [rimColor]);
 	
 	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
 }
@@ -249,7 +253,7 @@ function detectRimMeshes(wheelMeshes) {
 	});
 
 	let groups = groupSizes(wheelCandidates);
-	groups = groups.filter(group => group.length >= 4);
+	groups = groups.filter(group => group.length >= 3);
 
 	let rimFound = false;
 
@@ -310,7 +314,7 @@ function detectRimMeshes(wheelMeshes) {
 			} else {
 				if (
 					mesh.material.metalness > 0.6 &&
-					mesh.material.roughness < 0.4
+					mesh.material.roughness < 0.5
 				) {
 					rimMeshes.push(mesh);
 				}
