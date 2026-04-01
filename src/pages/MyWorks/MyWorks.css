@@ -17,3 +17,9 @@
 	border: 1px solid gray;
 	padding: 1rem;
 }
+
+.project-card-actions {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+}

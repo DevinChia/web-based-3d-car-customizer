@@ -158,7 +158,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			mesh.material.map = null;
 			mesh.material.color.set(rimColor);
 		});
-	}, [rimColor]);	
+	}, [rimColor]);
 	
 	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
 }
@@ -196,7 +196,7 @@ function detectBodyMeshes(bodyMeshes) {
 
 	const excludedBodyKeywords = [
 		"glass", "window", "mirror", "seat", "interior",
-		"dashboard", "exhaust", "engine", "light", "lamp"
+		"dashboard", "engine", "lamp"
 	];
 
 	let bodyKeywordCount = 0;
@@ -249,7 +249,7 @@ function detectRimMeshes(wheelMeshes) {
 	});
 
 	let groups = groupSizes(wheelCandidates);
-	groups = groups.filter(group => group.length >= 4);
+	groups = groups.filter(group => group.length >= 3);
 
 	let rimFound = false;
 
@@ -310,7 +310,7 @@ function detectRimMeshes(wheelMeshes) {
 			} else {
 				if (
 					mesh.material.metalness > 0.6 &&
-					mesh.material.roughness < 0.4
+					mesh.material.roughness < 0.5
 				) {
 					rimMeshes.push(mesh);
 				}

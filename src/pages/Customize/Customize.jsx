@@ -37,6 +37,7 @@ export default function Customize() {
 
 			setBodyColor(data.body_color);
 			setRimColor(data.rim_color);
+			setTempColor("#FFFFFF");
 
 			setOriginalBodyColor(data.body_color);
 			setOriginalRimColor(data.rim_color);
