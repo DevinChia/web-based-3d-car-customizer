@@ -139,10 +139,6 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 	
 		return () => {
 			window.removeEventListener("resize", handleResize);
-		  
-			// controls.dispose();
-			// renderer.dispose();
-
 			if (mount && renderer.domElement) {
 				mount.removeChild(renderer.domElement);
 			}
@@ -200,7 +196,7 @@ function detectBodyMeshes(bodyMeshes) {
 
 	const excludedBodyKeywords = [
 		"glass", "window", "mirror", "seat", "interior",
-		"dashboard", "exhaust", "engine", "light", "lamp"
+		"dashboard", "engine", "lamp"
 	];
 
 	let bodyKeywordCount = 0;
