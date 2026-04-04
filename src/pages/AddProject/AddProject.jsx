@@ -13,6 +13,7 @@ export default function AddProject() {
 	const [defaultModel, setDefaultModel] = useState("toyota_camry.glb");
 	const [errorMsg, setErrorMsg] = useState("");
 	const [showModal, setShowModal] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
@@ -45,7 +46,9 @@ export default function AddProject() {
 		if (isUploadModel && modelFile.size > MAX_FILE_SIZE) {
 			showError("Model file is too large. Maximum size is 50 MB.");
 			return;
-		}		
+		}
+
+		setIsSubmitting(true);
 
 		let modelUrl = null;
 
@@ -53,6 +56,7 @@ export default function AddProject() {
 			modelUrl = await uploadModel(modelFile);
 		
 			if (!modelUrl) {
+				setIsSubmitting(false);
 				showError("Failed to upload model.");
 				return;
 			}
@@ -72,6 +76,7 @@ export default function AddProject() {
 
 		const result = await createProject(project);
 		if (!result) {
+			setIsSubmitting(false);
 			showError("Terjadi error saat menyimpan project.");
 			return;
 		}
@@ -92,6 +97,7 @@ export default function AddProject() {
 							Title
 						</label>
 						<input
+							disabled={isSubmitting}
 							className="project-title-input"
 							type="text"
 							value={title}
@@ -103,7 +109,7 @@ export default function AddProject() {
 						<label>
 							Car Type
 						</label>
-						<select className="car-type-selector add-project-select-field" value={carType} onChange={(e) => setCarType(e.target.value)}>
+						<select disabled={isSubmitting} className="car-type-selector add-project-select-field" value={carType} onChange={(e) => setCarType(e.target.value)}>
 							<option>Sedan</option>
 							<option>SUV</option>
 							<option>Coupe</option>
@@ -113,6 +119,7 @@ export default function AddProject() {
 
 					<div className="upload-file-checkbox-field">
 						<input
+							disabled={isSubmitting}
 							className="upload-file-checkbox"
 							type="checkbox"
 							checked={isUploadModel}
@@ -132,6 +139,7 @@ export default function AddProject() {
 								Upload File (Max File Size: 50MB)
 							</label>
 							<input
+								disabled={isSubmitting}
 								className="upload-file-input"
 								type="file"
 								accept=".glb,.gltf,.obj"
@@ -146,6 +154,7 @@ export default function AddProject() {
 								Choose a Model
 							</label>
 							<select
+								disabled={isSubmitting}
 								className="choose-model-selector add-project-select-field"
 								value={defaultModel}
 								onChange={(e) => setDefaultModel(e.target.value)}
@@ -159,17 +168,18 @@ export default function AddProject() {
 					)}
 				</div>
 
-				<button className="project-start-customizing-button" type="submit">Start Customizing</button>
+				<button disabled={isSubmitting} className="project-start-customizing-button" type="submit">Start Customizing</button>
 			</form>
 			{showModal && (
 				<div className="error-popup-background">
 					<div className="error-popup">
 						<h3>Error</h3>
 						<p>{errorMsg}</p>
-						<button onClick={() => setShowModal(false)}>OK</button>
+						<button disabled={isSubmitting} onClick={() => setShowModal(false)}>OK</button>
 					</div>
 				</div>
 			)}
+			{isSubmitting && <div className="overlay"></div>}
 		</div>
 	);
 }
