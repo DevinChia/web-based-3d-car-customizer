@@ -53,37 +53,37 @@
 }
 
 .upload-file-checkbox-field {
-  display: flex;
+	display: flex;
 	flex-direction: row;
 	align-items: center;
 	gap: 0.3rem;
 }
 
 .upload-file-checkbox {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--color-2);
-  border-radius: 4px;
-  cursor: pointer;
-  display: inline-grid;
-  place-content: center;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	border: 2px solid var(--color-2);
+	border-radius: 4px;
+	cursor: pointer;
+	display: inline-grid;
+	place-content: center;
 }
 
 .upload-file-checkbox:checked {
-  background-color: var(--color-2);
+	background-color: var(--color-2);
 }
 
 .upload-file-checkbox::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
-  background-color: white;
+	content: "";
+	width: 10px;
+	height: 10px;
+	clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0, 43% 62%);
+	background-color: white;
 }
 
 .upload-file-checkbox:checked::before {
-  transform: scale(1);
+	transform: scale(1);
 }
 
 .upload-file-field {

@@ -16,6 +16,7 @@ export default function Customize() {
 	const [colorHistory, setColorHistory] = useState([]);
 	const [tempColor, setTempColor] = useState("#ffffff");
 	const [isSaving, setIsSaving] = useState(false);
+	const [isModelLoading, setIsModelLoading] = useState(true);
 
 	const addToHistory = (color) => {
 		setColorHistory((prev) => {
@@ -28,7 +29,7 @@ export default function Customize() {
 		show: false,
 		message: "",
 		type: "success",
-	});	
+	});
 
 	useEffect(() => {
 		const fetchProject = async () => {
@@ -87,65 +88,68 @@ export default function Customize() {
 		const isChanged =
 			bodyColor !== originalBodyColor ||
 			rimColor !== originalRimColor;
-	
+
 		if (!isChanged) {
 			showToast("No changes to save", "info");
 			return;
 		}
-	
+
 		setIsSaving(true);
-	
+
 		const result = await updateProject(id, {
 			body_color: bodyColor,
 			rim_color: rimColor,
 			updated_at: new Date().toISOString(),
 		});
-	
+
 		if (!result) {
 			setIsSaving(false);
 			showToast("Failed to save", "error");
 			return;
 		}
-	
+
 		setOriginalBodyColor(bodyColor);
 		setOriginalRimColor(rimColor);
-	
+
 		showToast("Saved successfully!", "success");
-	
+
 		setIsSaving(false);
-	};	
+	};
 
 	return (
 		<div className="viewer-container">
-	
+
 			<div className="sidebar">
 				<h2 className="sidebar-title">{project.title}</h2>
-	
+
 				<hr />
-	
+
 				<p className="section-title">Parts</p>
 				<div className="parts-container">
 					<button
+						disabled={isModelLoading || isSaving}
 						className={`part-button ${selectedPart === "body" ? "active" : ""}`}
 						onClick={() => setSelectedPart("body")}
 					>
 						Body
 					</button>
-	
+
 					<button
+						disabled={isModelLoading || isSaving}
 						className={`part-button ${selectedPart === "rim" ? "active" : ""}`}
 						onClick={() => setSelectedPart("rim")}
 					>
 						Rim
 					</button>
 				</div>
-	
+
 				<hr />
-	
+
 				<p className="section-title">Color</p>
 
 				<div className="color-picker">
 					<input
+						disabled={isModelLoading || isSaving}
 						type="color"
 						value={tempColor}
 						onChange={(e) => {
@@ -169,6 +173,7 @@ export default function Customize() {
 							className="color-box"
 							style={{ backgroundColor: color }}
 							onClick={() => {
+								if (isModelLoading || isSaving) return;
 								if (selectedPart === "body") setBodyColor(color);
 								else setRimColor(color);
 							}}
@@ -183,16 +188,17 @@ export default function Customize() {
 							className="color-box"
 							style={{ backgroundColor: color }}
 							onClick={() => {
+								if (isModelLoading || isSaving) return;
 								addToHistory(color);
 							
 								if (selectedPart === "body") setBodyColor(color);
 								else setRimColor(color);
-							}}							
+							}}
 						/>
 					))}
 				</div>
 
-				<button onClick={handleSave} className="save-button">
+				<button disabled={isModelLoading || isSaving} onClick={handleSave} className="save-button">
 					Save
 				</button>
 			</div>
@@ -201,6 +207,7 @@ export default function Customize() {
 				modelPath={modelPath}
 				bodyColor={bodyColor}
 				rimColor={rimColor}
+				onLoadingChange={setIsModelLoading}
 			/>
 
 			<div className={`toast ${toast.show ? "show" : ""} ${toast.type}`}>

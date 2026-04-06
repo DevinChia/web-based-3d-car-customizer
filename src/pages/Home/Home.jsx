@@ -8,7 +8,7 @@ export default function Home() {
 			<div className="home-text-container">
 				<h1 className="home-title">3D Car Customizer</h1>
 				<p className="home-intro">
-				A web-based interactive 3D car customization platform that allows users to visualize and modify vehicle models in real-time. Built using modern web technologies, this application demonstrates the implementation of React and WebGL-based rendering for immersive product visualization directly in the browser.
+					A web-based interactive 3D car customization platform that allows users to visualize and modify vehicle models in real-time. Built using modern web technologies, this application demonstrates the implementation of React and WebGL-based rendering for immersive product visualization directly in the browser.
 				</p>
 			</div>
 			<div className="home-buttons-container">

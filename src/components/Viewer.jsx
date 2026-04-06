@@ -1,26 +1,32 @@
-import { useEffect, useRef } from "react";
+import "./Viewer.css";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-export default function Viewer({ modelPath, bodyColor, rimColor }) {
+export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange }) {
 	const mountRef = useRef(null);
 	const bodyMeshesRef = useRef([]);
 	const rimMeshesRef = useRef([]);
 
+	const [isLoading, setIsLoading] = useState(true);
+
 	useEffect(() => {
+		setIsLoading(true);
+		onLoadingChange?.(true);
+
 		const mount = mountRef.current;
-	
+
 		const scene = new THREE.Scene();
 		scene.background = new THREE.Color(0xEDEDED);
-	
+
 		const camera = new THREE.PerspectiveCamera(
 			75,
 			mount.clientWidth / mount.clientHeight,
 			0.1,
 			1000
 		);
-	
+
 		const renderer = new THREE.WebGLRenderer({ antialias: true });
 		renderer.setSize(mount.clientWidth, mount.clientHeight);
 
@@ -31,13 +37,13 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();
 		};
-		  
+
 		window.addEventListener("resize", handleResize);		  
-	
+
 		mount.appendChild(renderer.domElement);
-	
+
 		camera.position.set(2, 0.6, 2);
-	
+
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 		controls.dampingFactor = 0.05;
@@ -60,7 +66,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 
 		loader.load(modelPath, (gltf) => {
 			const model = gltf.scene;
-			
+
 			const totalBox = new THREE.Box3().setFromObject(model);
 			const totalSize = totalBox.getSize(new THREE.Vector3());
 
@@ -75,12 +81,9 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 
 			const finalBox = new THREE.Box3().setFromObject(model);
 
-			// const helper = new THREE.Box3Helper(finalBox, 0xff0000);
-			// scene.add(helper);
-
 			const bodyMeshes = [];
 			const wheelMeshes = [];
-		  
+
 			model.traverse((child) => {
 				if (child.isMesh) {
 					const mat = child.material;
@@ -101,7 +104,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 					// scene.add(helper);
 
 					child.material = mat.clone();
-					
+
 					if (isWheelArea) wheelMeshes.push(child);
 					else bodyMeshes.push(child);
 				}
@@ -124,19 +127,22 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			}
 
 			scene.add(model);
-		  
+
 			controls.target.set(0, size.y * 0.3, 0);
 			controls.update();
+
+			setIsLoading(false);
+			onLoadingChange?.(false);
 		});
-	
+
 		const animate = () => {
 			requestAnimationFrame(animate);
 			controls.update();
 			renderer.render(scene, camera);
 		};
-	
+
 		animate();
-	
+
 		return () => {
 			window.removeEventListener("resize", handleResize);
 			if (mount && renderer.domElement) {
@@ -151,7 +157,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			mesh.material.color.set(bodyColor);
 		});
 	}, [bodyColor]);
-	
+
 	useEffect(() => {
 		if (rimMeshesRef.current.length === 0) return;
 		rimMeshesRef.current.forEach((mesh) => {
@@ -159,8 +165,18 @@ export default function Viewer({ modelPath, bodyColor, rimColor }) {
 			mesh.material.color.set(rimColor);
 		});
 	}, [rimColor]);
-	
-	return <div ref={mountRef} style={{ width: "100%", height: "100%" }}></div>;
+
+	return (
+		<div style={{ width: "100%", height: "100%", position: "relative" }}>
+			<div ref={mountRef} style={{ width: "100%", height: "100%" }} />
+
+			{isLoading && (
+				<div className="viewer-loading">
+					Loading Model...
+				</div>
+			)}
+		</div>
+	);
 }
 
 const containsKeyword = (text, keywords) => keywords.some(keyword => text.includes(keyword));

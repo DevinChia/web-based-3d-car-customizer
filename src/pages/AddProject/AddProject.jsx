@@ -60,7 +60,7 @@ export default function AddProject() {
 				showError("Failed to upload model.");
 				return;
 			}
-		}		
+		}
 		else {
 			modelUrl = `/models/${defaultModel}`;
 		}
