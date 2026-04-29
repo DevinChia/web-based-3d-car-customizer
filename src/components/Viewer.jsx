@@ -8,6 +8,8 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 	const mountRef = useRef(null);
 	const bodyMeshesRef = useRef([]);
 	const rimMeshesRef = useRef([]);
+	const originalBodyMaterialsRef = useRef([]);
+	const originalRimMaterialsRef = useRef([]);
 
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -113,6 +115,9 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 			bodyMeshesRef.current = detectBodyMeshes(bodyMeshes);
 			rimMeshesRef.current = detectRimMeshes(wheelMeshes);
 
+			originalBodyMaterialsRef.current = bodyMeshesRef.current.map(mesh => mesh.material.clone());
+			originalRimMaterialsRef.current = rimMeshesRef.current.map(mesh => mesh.material.clone());
+
 			if (bodyColor) {
 				bodyMeshesRef.current.forEach((mesh) => {
 					mesh.material.color.set(bodyColor);
@@ -153,16 +158,24 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 
 	useEffect(() => {
 		if (bodyMeshesRef.current.length === 0) return;
-		bodyMeshesRef.current.forEach((mesh) => {
-			mesh.material.color.set(bodyColor);
+		bodyMeshesRef.current.forEach((mesh, index) => {
+			if (!bodyColor) {
+				mesh.material.copy(originalBodyMaterialsRef.current[index]);
+			} else {
+				mesh.material.color.set(bodyColor);
+			}
 		});
 	}, [bodyColor]);
 
 	useEffect(() => {
 		if (rimMeshesRef.current.length === 0) return;
-		rimMeshesRef.current.forEach((mesh) => {
-			mesh.material.map = null;
-			mesh.material.color.set(rimColor);
+		rimMeshesRef.current.forEach((mesh, index) => {
+			if (!rimColor) {
+				mesh.material.copy(originalRimMaterialsRef.current[index]);
+			} else {
+				mesh.material.map = null;
+				mesh.material.color.set(rimColor);
+			}
 		});
 	}, [rimColor]);
 

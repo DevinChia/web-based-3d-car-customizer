@@ -198,6 +198,12 @@ export default function Customize() {
 					))}
 				</div>
 
+				<button disabled={isModelLoading || isSaving} onClick={() => {
+					setBodyColor(originalBodyColor);
+					setRimColor(originalRimColor);					
+				}} className="reset-button">
+					Reset
+				</button>
 				<button disabled={isModelLoading || isSaving} onClick={handleSave} className="save-button">
 					Save
 				</button>
