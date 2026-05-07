@@ -43,6 +43,25 @@ export default function AddProject() {
 			return;
 		}
 
+		if (isUploadModel && modelFile) {
+			const fileName = modelFile.name.toLowerCase();
+			const isGlbExtension = fileName.endsWith(".glb");
+		
+			const validMimeTypes = [
+				"model/gltf-binary",
+				"application/octet-stream"
+			];
+		
+			const isValidMime =
+				validMimeTypes.includes(modelFile.type) ||
+				modelFile.type === "";
+		
+			if (!isGlbExtension || !isValidMime) {
+				showError("Only .glb files are allowed.");
+				return;
+			}
+		}
+
 		if (isUploadModel && modelFile.size > MAX_FILE_SIZE) {
 			showError("Model file is too large. Maximum size is 50 MB.");
 			return;
@@ -142,7 +161,7 @@ export default function AddProject() {
 								disabled={isSubmitting}
 								className="upload-file-input"
 								type="file"
-								accept=".glb,.gltf,.obj"
+								accept=".glb"
 								onChange={(e) => setModelFile(e.target.files[0])}
 							/>
 						</div>
