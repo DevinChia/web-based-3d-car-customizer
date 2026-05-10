@@ -97,7 +97,17 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 
 					const frontBackLimit = size.z * 0.35;
 
-					const isLow = childCenter.y < finalBox.min.y + size.y * 0.25;
+					const aspectRatio = size.y / size.z;
+					let wheelHeightFactor;
+
+					if (aspectRatio > 0.31) {
+						wheelHeightFactor = 0.25; // suv / hatchback
+					}
+					else {
+						wheelHeightFactor = 0.31; // sedan / coupe
+					}
+
+					const isLow = childCenter.y < finalBox.min.y + size.y * wheelHeightFactor;
 					const isMiddle = Math.abs(childCenter.z) < frontBackLimit;
 
 					const isWheelArea = isLow && isMiddle;
