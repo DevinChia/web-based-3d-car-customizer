@@ -24,12 +24,24 @@
 	font-weight: bold;
 }
 
+.camera-view-container {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+
+.top-button {
+	grid-column: 1 / 3;
+	justify-self: center;
+	width: 48%;
+}
+
 .parts-container {
 	display: flex;
 	gap: 10px;
 }
 
-.part-button {
+.selection-button {
 	flex: 1;
 	padding: 8px;
 	background: var(--color-4);
@@ -39,7 +51,7 @@
 	border-radius: 5px;
 }
 
-.part-button.active {
+.selection-button.active {
 	background-color: var(--color-2);
 }
 

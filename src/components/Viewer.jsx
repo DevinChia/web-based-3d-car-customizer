@@ -4,12 +4,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange }) {
+export default function Viewer({ modelPath, bodyColor, rimColor, viewMode, cameraView, onLoadingChange }) {
 	const mountRef = useRef(null);
 	const bodyMeshesRef = useRef([]);
 	const rimMeshesRef = useRef([]);
 	const originalBodyMaterialsRef = useRef([]);
 	const originalRimMaterialsRef = useRef([]);
+	const controlsRef = useRef(null);
+	const cameraRef = useRef(null);
 
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -53,6 +55,9 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 		controls.maxDistance = 10;
 		controls.enablePan = true;
 		controls.screenSpacePanning = false;
+
+		cameraRef.current = camera;
+		controlsRef.current = controls;
 
 		const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 		scene.add(ambientLight);
@@ -146,6 +151,8 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 			controls.target.set(0, size.y * 0.3, 0);
 			controls.update();
 
+			updateCameraView();
+
 			setIsLoading(false);
 			onLoadingChange?.(false);
 		});
@@ -188,6 +195,77 @@ export default function Viewer({ modelPath, bodyColor, rimColor, onLoadingChange
 			}
 		});
 	}, [rimColor]);
+
+	useEffect(() => {
+		updateCameraView();
+	}, [viewMode, cameraView]);
+
+	const updateCameraView = () => {
+		if (!cameraRef.current || !controlsRef.current) return;
+	
+		const camera = cameraRef.current;
+		const controls = controlsRef.current;
+	
+		const sideDistance = 2.1;
+		const frontBackDistance = 2.8;
+		const topDistance = 2.4;
+		const targetY = 0.3;
+	
+		if (viewMode === "3d") {
+			controls.enabled = true;
+			controls.enableDamping = true;
+			controls.enableRotate = true;
+			controls.enablePan = true;
+			controls.enableZoom = true;
+	
+			camera.up.set(0, 1, 0);
+			camera.position.set(2, 0.6, 2);
+			controls.target.set(0, targetY, 0);
+			controls.update();
+	
+			return;
+		}
+	
+		controls.enabled = false;
+		controls.enableDamping = false;
+		controls.reset();
+		camera.up.set(0, 1, 0);
+	
+		switch (cameraView) {
+			case "front":
+				camera.position.set(0, targetY, frontBackDistance);
+				break;
+	
+			case "back":
+				camera.position.set(0, targetY, -frontBackDistance);
+				break;
+	
+			case "left":
+				camera.position.set(-sideDistance, targetY, 0);
+				break;
+	
+			case "right":
+				camera.position.set(sideDistance, targetY, 0);
+				break;
+	
+			case "top":
+				camera.position.set(0, topDistance, 0.001);
+				camera.up.set(0, 0, -1);
+				break;
+	
+			default:
+				camera.position.set(0, targetY, frontBackDistance);
+		}
+	
+		controls.target.set(0, targetY, 0);
+		camera.lookAt(0, targetY, 0);
+		controls.update();
+	
+		controls.enabled = true;
+		controls.enableRotate = false;
+		controls.enablePan = false;
+		controls.enableZoom = true;
+	};
 
 	return (
 		<div style={{ width: "100%", height: "100%", position: "relative" }}>

@@ -17,6 +17,8 @@ export default function Customize() {
 	const [tempColor, setTempColor] = useState("#ffffff");
 	const [isSaving, setIsSaving] = useState(false);
 	const [isModelLoading, setIsModelLoading] = useState(true);
+	const [viewMode, setViewMode] = useState("3d");
+	const [cameraView, setCameraView] = useState("front");
 
 	const addToHistory = (color) => {
 		setColorHistory((prev) => {
@@ -124,11 +126,85 @@ export default function Customize() {
 
 				<hr />
 
+				<p className="section-title">View Mode</p>
+
+				<div className="parts-container">
+					<button
+						disabled={isModelLoading || isSaving}
+						className={`selection-button ${viewMode === "2d" ? "active" : ""}`}
+						onClick={() => {
+							setViewMode("2d");
+							setCameraView("front");
+						}}
+					>
+						2D
+					</button>
+
+					<button
+						disabled={isModelLoading || isSaving}
+						className={`selection-button ${viewMode === "3d" ? "active" : ""}`}
+						onClick={() => setViewMode("3d")}
+					>
+						3D
+					</button>
+				</div>
+				{viewMode === "2d" && (
+					<>
+						<hr />
+
+						<p className="section-title">Camera View</p>
+
+						<div className="camera-view-container">
+							<button
+								disabled={isModelLoading || isSaving}
+								className={`selection-button ${cameraView === "front" ? "active" : ""}`}
+								onClick={() => setCameraView("front")}
+							>
+								Front
+							</button>
+
+							<button
+								disabled={isModelLoading || isSaving}
+								className={`selection-button ${cameraView === "back" ? "active" : ""}`}
+								onClick={() => setCameraView("back")}
+							>
+								Back
+							</button>
+
+							<button
+								disabled={isModelLoading || isSaving}
+								className={`selection-button ${cameraView === "left" ? "active" : ""}`}
+								onClick={() => setCameraView("left")}
+							>
+								Left
+							</button>
+
+							<button
+								disabled={isModelLoading || isSaving}
+								className={`selection-button ${cameraView === "right" ? "active" : ""}`}
+								onClick={() => setCameraView("right")}
+							>
+								Right
+							</button>
+
+							<button
+								disabled={isModelLoading || isSaving}
+								className={`selection-button top-button ${cameraView === "top" ? "active" : ""}`}
+								onClick={() => setCameraView("top")}
+							>
+								Top
+							</button>
+						</div>
+					</>
+				)}
+
+				<hr />
+
 				<p className="section-title">Parts</p>
 				<div className="parts-container">
 					<button
 						disabled={isModelLoading || isSaving}
-						className={`part-button ${selectedPart === "body" ? "active" : ""}`}
+						className={`selection-button ${selectedPart === "body" ? "active" : ""}`}
 						onClick={() => setSelectedPart("body")}
 					>
 						Body
@@ -136,7 +212,7 @@ export default function Customize() {
 
 					<button
 						disabled={isModelLoading || isSaving}
-						className={`part-button ${selectedPart === "rim" ? "active" : ""}`}
+						className={`selection-button ${selectedPart === "rim" ? "active" : ""}`}
 						onClick={() => setSelectedPart("rim")}
 					>
 						Rim
@@ -213,6 +289,8 @@ export default function Customize() {
 				modelPath={modelPath}
 				bodyColor={bodyColor}
 				rimColor={rimColor}
+				viewMode={viewMode}
+				cameraView={cameraView}
 				onLoadingChange={setIsModelLoading}
 			/>
 
