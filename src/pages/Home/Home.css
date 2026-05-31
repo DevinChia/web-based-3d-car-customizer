@@ -3,7 +3,7 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	height: 100vh;
+	min-height: 100vh;
 	padding: 0 10rem;
 	gap: 1.5rem;
 }
@@ -14,6 +14,16 @@
 	justify-content: center;
 	align-items: center;
 	text-align: center;
+	max-width: 1200px;
+}
+
+.home-title {
+	font-size: 2rem;
+}
+
+.home-intro {
+	font-size: 1rem;
+	line-height: 1.6;
 }
 
 .home-buttons-container {
@@ -45,4 +55,41 @@
 .home-view-works-button {
 	background-color: var(--color-1);
 	color: var(--font-color-1);
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+	.home {
+		padding: 0 3rem;
+	}
+
+	.home-title {
+		font-size: 2rem;
+	}
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+	.home {
+		padding: 1.5rem;
+		gap: 2rem;
+	}
+
+	.home-title {
+		font-size: 2rem;
+	}
+
+	.home-intro {
+		font-size: 0.9rem;
+	}
+
+	.home-buttons-container {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.home-buttons-container button {
+		width: 100%;
+		max-width: 320px;
+	}
 }

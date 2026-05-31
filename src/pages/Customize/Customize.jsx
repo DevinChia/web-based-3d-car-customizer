@@ -19,6 +19,7 @@ export default function Customize() {
 	const [isModelLoading, setIsModelLoading] = useState(true);
 	const [viewMode, setViewMode] = useState("3d");
 	const [cameraView, setCameraView] = useState("front");
+	const [isPanelOpen, setIsPanelOpen] = useState(false);
 
 	const addToHistory = (color) => {
 		setColorHistory((prev) => {
@@ -122,178 +123,203 @@ export default function Customize() {
 		<div className="viewer-container">
 
 			<div className="sidebar">
-				<h2 className="sidebar-title">{project.title}</h2>
-
-				<hr />
-
-				<p className="section-title">View Mode</p>
-
-				<div className="parts-container">
+				<div
+					className="sidebar-toggle"
+					onClick={() => setIsPanelOpen(!isPanelOpen)}
+				>
+					{isPanelOpen ? "▼ Hide Controls" : "▲ Show Controls"}
+				</div>
+	
+				<div className={`sidebar-content ${isPanelOpen ? "open" : ""}`}>
+	
+					<h2 className="sidebar-title">{project.title}</h2>
+	
+					<hr />
+	
+					<p className="section-title">View Mode</p>
+	
+					<div className="parts-container">
+						<button
+							disabled={isModelLoading || isSaving}
+							className={`selection-button ${viewMode === "2d" ? "active" : ""}`}
+							onClick={() => {
+								setViewMode("2d");
+								setCameraView("front");
+							}}
+						>
+							2D
+						</button>
+	
+						<button
+							disabled={isModelLoading || isSaving}
+							className={`selection-button ${viewMode === "3d" ? "active" : ""}`}
+							onClick={() => setViewMode("3d")}
+						>
+							3D
+						</button>
+					</div>
+	
+					{viewMode === "2d" && (
+						<>
+							<hr />
+	
+							<p className="section-title">Camera View</p>
+	
+							<div className="camera-view-container">
+								<button
+									disabled={isModelLoading || isSaving}
+									className={`selection-button ${cameraView === "front" ? "active" : ""}`}
+									onClick={() => setCameraView("front")}
+								>
+									Front
+								</button>
+	
+								<button
+									disabled={isModelLoading || isSaving}
+									className={`selection-button ${cameraView === "back" ? "active" : ""}`}
+									onClick={() => setCameraView("back")}
+								>
+									Back
+								</button>
+	
+								<button
+									disabled={isModelLoading || isSaving}
+									className={`selection-button ${cameraView === "left" ? "active" : ""}`}
+									onClick={() => setCameraView("left")}
+								>
+									Left
+								</button>
+	
+								<button
+									disabled={isModelLoading || isSaving}
+									className={`selection-button ${cameraView === "right" ? "active" : ""}`}
+									onClick={() => setCameraView("right")}
+								>
+									Right
+								</button>
+	
+								<button
+									disabled={isModelLoading || isSaving}
+									className={`selection-button top-button ${cameraView === "top" ? "active" : ""}`}
+									onClick={() => setCameraView("top")}
+								>
+									Top
+								</button>
+							</div>
+						</>
+					)}
+	
+					<hr />
+	
+					<p className="section-title">Parts</p>
+	
+					<div className="parts-container">
+						<button
+							disabled={isModelLoading || isSaving}
+							className={`selection-button ${selectedPart === "body" ? "active" : ""}`}
+							onClick={() => setSelectedPart("body")}
+						>
+							Body
+						</button>
+	
+						<button
+							disabled={isModelLoading || isSaving}
+							className={`selection-button ${selectedPart === "rim" ? "active" : ""}`}
+							onClick={() => setSelectedPart("rim")}
+						>
+							Rim
+						</button>
+					</div>
+	
+					<hr />
+	
+					<p className="section-title">Color</p>
+	
+					<div className="color-picker">
+						<input
+							disabled={isModelLoading || isSaving}
+							type="color"
+							value={tempColor}
+							onChange={(e) => {
+								const color = e.target.value;
+								setTempColor(color);
+	
+								if (selectedPart === "body") setBodyColor(color);
+								else setRimColor(color);
+							}}
+							onBlur={() => addToHistory(tempColor)}
+						/>
+	
+						<p>Choose a color</p>
+					</div>
+	
+					<div className="color-history">
+						{colorHistory.map((color) => (
+							<div
+								key={color}
+								className="color-box"
+								style={{ backgroundColor: color }}
+								onClick={() => {
+									if (isModelLoading || isSaving) return;
+	
+									if (selectedPart === "body") setBodyColor(color);
+									else setRimColor(color);
+								}}
+							/>
+						))}
+					</div>
+	
+					<div className="preset-colors">
+						{["#ff0000", "#0000ff", "#00ff00", "#000000", "#ffffff"].map((color) => (
+							<div
+								key={color}
+								className="color-box"
+								style={{ backgroundColor: color }}
+								onClick={() => {
+									if (isModelLoading || isSaving) return;
+	
+									addToHistory(color);
+	
+									if (selectedPart === "body") setBodyColor(color);
+									else setRimColor(color);
+								}}
+							/>
+						))}
+					</div>
+	
 					<button
 						disabled={isModelLoading || isSaving}
-						className={`selection-button ${viewMode === "2d" ? "active" : ""}`}
 						onClick={() => {
-							setViewMode("2d");
-							setCameraView("front");
+							setBodyColor(originalBodyColor);
+							setRimColor(originalRimColor);
 						}}
+						className="reset-button"
 					>
-						2D
+						Reset
 					</button>
-
+	
 					<button
 						disabled={isModelLoading || isSaving}
-						className={`selection-button ${viewMode === "3d" ? "active" : ""}`}
-						onClick={() => setViewMode("3d")}
+						onClick={handleSave}
+						className="save-button"
 					>
-						3D
+						Save
 					</button>
+	
 				</div>
-				{viewMode === "2d" && (
-					<>
-						<hr />
-
-						<p className="section-title">Camera View</p>
-
-						<div className="camera-view-container">
-							<button
-								disabled={isModelLoading || isSaving}
-								className={`selection-button ${cameraView === "front" ? "active" : ""}`}
-								onClick={() => setCameraView("front")}
-							>
-								Front
-							</button>
-
-							<button
-								disabled={isModelLoading || isSaving}
-								className={`selection-button ${cameraView === "back" ? "active" : ""}`}
-								onClick={() => setCameraView("back")}
-							>
-								Back
-							</button>
-
-							<button
-								disabled={isModelLoading || isSaving}
-								className={`selection-button ${cameraView === "left" ? "active" : ""}`}
-								onClick={() => setCameraView("left")}
-							>
-								Left
-							</button>
-
-							<button
-								disabled={isModelLoading || isSaving}
-								className={`selection-button ${cameraView === "right" ? "active" : ""}`}
-								onClick={() => setCameraView("right")}
-							>
-								Right
-							</button>
-
-							<button
-								disabled={isModelLoading || isSaving}
-								className={`selection-button top-button ${cameraView === "top" ? "active" : ""}`}
-								onClick={() => setCameraView("top")}
-							>
-								Top
-							</button>
-						</div>
-					</>
-				)}
-
-				<hr />
-
-				<p className="section-title">Parts</p>
-				<div className="parts-container">
-					<button
-						disabled={isModelLoading || isSaving}
-						className={`selection-button ${selectedPart === "body" ? "active" : ""}`}
-						onClick={() => setSelectedPart("body")}
-					>
-						Body
-					</button>
-
-					<button
-						disabled={isModelLoading || isSaving}
-						className={`selection-button ${selectedPart === "rim" ? "active" : ""}`}
-						onClick={() => setSelectedPart("rim")}
-					>
-						Rim
-					</button>
-				</div>
-
-				<hr />
-
-				<p className="section-title">Color</p>
-
-				<div className="color-picker">
-					<input
-						disabled={isModelLoading || isSaving}
-						type="color"
-						value={tempColor}
-						onChange={(e) => {
-							const color = e.target.value;
-							setTempColor(color);
-
-							if (selectedPart === "body") setBodyColor(color);
-							else setRimColor(color);
-						}}
-						onBlur={() => {
-							addToHistory(tempColor);
-						}}
-					/>
-					<p>Choose a color</p>
-				</div>
-
-				<div className="color-history">
-					{colorHistory.map((color) => (
-						<div
-							key={color}
-							className="color-box"
-							style={{ backgroundColor: color }}
-							onClick={() => {
-								if (isModelLoading || isSaving) return;
-								if (selectedPart === "body") setBodyColor(color);
-								else setRimColor(color);
-							}}
-						/>
-					))}
-				</div>
-
-				<div className="preset-colors">
-					{["#ff0000", "#0000ff", "#00ff00", "#000000", "#ffffff"].map((color) => (
-						<div
-							key={color}
-							className="color-box"
-							style={{ backgroundColor: color }}
-							onClick={() => {
-								if (isModelLoading || isSaving) return;
-								addToHistory(color);
-							
-								if (selectedPart === "body") setBodyColor(color);
-								else setRimColor(color);
-							}}
-						/>
-					))}
-				</div>
-
-				<button disabled={isModelLoading || isSaving} onClick={() => {
-					setBodyColor(originalBodyColor);
-					setRimColor(originalRimColor);					
-				}} className="reset-button">
-					Reset
-				</button>
-				<button disabled={isModelLoading || isSaving} onClick={handleSave} className="save-button">
-					Save
-				</button>
 			</div>
 	
-			<Viewer
-				modelPath={modelPath}
-				bodyColor={bodyColor}
-				rimColor={rimColor}
-				viewMode={viewMode}
-				cameraView={cameraView}
-				onLoadingChange={setIsModelLoading}
-			/>
-
+			<div className="viewer-section">
+				<Viewer
+					modelPath={modelPath}
+					bodyColor={bodyColor}
+					rimColor={rimColor}
+					viewMode={viewMode}
+					cameraView={cameraView}
+					onLoadingChange={setIsModelLoading}
+				/>
+			</div>
+	
 			<div className={`toast ${toast.show ? "show" : ""} ${toast.type}`}>
 				{toast.message}
 			</div>

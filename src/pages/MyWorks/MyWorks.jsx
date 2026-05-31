@@ -61,7 +61,7 @@ export default function MyWorks() {
 			<h1>My Works</h1>
 
 			{/* Controls */}
-			<div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+			<div className="works-controls">
 				<select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
 					<option value="title">Name</option>
 					<option value="created_at">Created</option>

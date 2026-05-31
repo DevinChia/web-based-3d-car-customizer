@@ -12,6 +12,7 @@ export default function Viewer({ modelPath, bodyColor, rimColor, viewMode, camer
 	const originalRimMaterialsRef = useRef([]);
 	const controlsRef = useRef(null);
 	const cameraRef = useRef(null);
+	const isMobile = () => window.innerWidth <= 480;
 
 	const [isLoading, setIsLoading] = useState(true);
 
@@ -40,19 +41,27 @@ export default function Viewer({ modelPath, bodyColor, rimColor, viewMode, camer
 			renderer.setSize(width, height);
 			camera.aspect = width / height;
 			camera.updateProjectionMatrix();
+		
+			updateCameraView();
 		};
 
 		window.addEventListener("resize", handleResize);		  
 
 		mount.appendChild(renderer.domElement);
 
-		camera.position.set(2, 0.6, 2);
+		const defaultDistance = isMobile() ? 2.8 : 2;
+
+		camera.position.set(
+			defaultDistance,
+			0.6,
+			defaultDistance
+		);
 
 		const controls = new OrbitControls(camera, renderer.domElement);
 		controls.enableDamping = true;
 		controls.dampingFactor = 0.05;
-		controls.minDistance = 2;
-		controls.maxDistance = 10;
+		controls.minDistance = isMobile() ? 2.5 : 2;
+		controls.maxDistance = isMobile() ? 12 : 10;
 		controls.enablePan = true;
 		controls.screenSpacePanning = false;
 
@@ -206,10 +215,14 @@ export default function Viewer({ modelPath, bodyColor, rimColor, viewMode, camer
 		const camera = cameraRef.current;
 		const controls = controlsRef.current;
 	
-		const sideDistance = 2.1;
-		const frontBackDistance = 2.8;
-		const topDistance = 2.4;
+		const mobile = isMobile();
+
+		const sideDistance = mobile ? 2.8 : 2.1;
+		const frontBackDistance = mobile ? 3.5 : 2.8;
+		const topDistance = mobile ? 3.0 : 2.4;
 		const targetY = 0.3;
+
+		const orbitDistance = mobile ? 2.8 : 2;
 	
 		if (viewMode === "3d") {
 			controls.enabled = true;
@@ -219,7 +232,11 @@ export default function Viewer({ modelPath, bodyColor, rimColor, viewMode, camer
 			controls.enableZoom = true;
 	
 			camera.up.set(0, 1, 0);
-			camera.position.set(2, 0.6, 2);
+			camera.position.set(
+				orbitDistance,
+				0.6,
+				orbitDistance
+			);
 			controls.target.set(0, targetY, 0);
 			controls.update();
 	
