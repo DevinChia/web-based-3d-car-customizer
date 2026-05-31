@@ -258,11 +258,11 @@ export default function Viewer({ modelPath, bodyColor, rimColor, viewMode, camer
 				break;
 	
 			case "left":
-				camera.position.set(-sideDistance, targetY, 0);
+				camera.position.set(sideDistance, targetY, 0);
 				break;
 	
 			case "right":
-				camera.position.set(sideDistance, targetY, 0);
+				camera.position.set(-sideDistance, targetY, 0);
 				break;
 	
 			case "top":
