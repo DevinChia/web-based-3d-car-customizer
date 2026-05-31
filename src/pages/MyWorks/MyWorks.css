@@ -1,5 +1,5 @@
 .my-works {
-	height: 100vh;
+	height: 100dvh;
 	display: flex;
 	flex-direction: column;
 	padding: 5rem 6rem;
@@ -155,8 +155,8 @@
 @media (max-width: 768px) {
 	.my-works {
 		padding: 1.5rem;
-		height: 100vh;
-		min-height: 100vh;
+		height: 100dvh;
+		min-height: 100dvh;
 	}
 
 	.my-works h1 {
