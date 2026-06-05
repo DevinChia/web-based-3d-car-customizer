@@ -5,6 +5,7 @@ import Home from "../pages/Home/Home";
 import AddProject from "../pages/AddProject/AddProject";
 import Customize from "../pages/Customize/Customize";
 import MyWorks from "../pages/MyWorks/MyWorks";
+import UserGuide from "../pages/UserGuide/UserGuide";
 
 export default function Router() {
 	return (
@@ -15,6 +16,7 @@ export default function Router() {
 					<Route path="/add-project" element={<AddProject />} />
 					<Route path="/customize/:id" element={<Customize />} />
 					<Route path="/my-works" element={<MyWorks />} />
+					<Route path="/user-guide" element={<UserGuide />} />
 				</Route>
 			</Routes>
 		</BrowserRouter>

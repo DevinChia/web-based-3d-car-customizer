@@ -24,6 +24,7 @@ export default function Navbar() {
 			<Link to="/">Home</Link>
 			<Link to="/add-project">Add Project</Link>
 			<Link to="/my-works">My Works</Link>
+			<Link to="/user-guide">User Guide</Link>
 		</div>
 	</div>
 	);
